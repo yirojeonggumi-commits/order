@@ -272,7 +272,20 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
 .pulse{animation:pulse 1.25s ease-in-out 3}
 @media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+#gate{position:fixed;inset:0;z-index:950;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+.gbox{width:100%;max-width:340px;text-align:center}
+.gbox .seal{margin:0 auto 18px}
+.gbox h2{font-size:21px;margin:0 0 8px}
+.gbox p{color:var(--sub);font-size:14px;margin:0 0 20px;line-height:1.55}
+#g-name{width:100%;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font:inherit;color:inherit;text-align:center}
+.gst{display:flex;gap:8px;margin:10px 0}
+.gst button{flex:1;padding:13px 0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--sub);font-weight:700}
+.gst button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.gsend{width:100%;padding:15px;border:0;border-radius:12px;background:var(--brand);color:#fff;font-weight:800;font-size:16px}
+.gsend:disabled{opacity:.45}
 </style>
+
+<div id="gate" hidden><div class="gbox"><span class="seal">理老亭</span><h2 id="g-title">사용 신청</h2><p id="g-msg">이름을 적고 매장을 고른 뒤 신청하십시오.</p><div id="g-form"><input id="g-name" type="text" placeholder="이름" autocomplete="off"><div class="gst"><button type="button" data-s="구미">구미</button><button type="button" data-s="현풍">현풍</button><button type="button" data-s="밀양">밀양</button></div><button type="button" class="gsend" id="g-send">사용 신청하기</button></div></div></div>
 
 <div class="top">
   <div class="top-in">
@@ -752,6 +765,7 @@ function slipText(v){
 }
 let sent=null;
 const API='https://script.google.com/macros/s/AKfycbwk90riQRjotfLfoK03mSa28OyUQ1twt67xzoS2xcMs0a9YWMa2-Mkgs7scV58qft7k/exec';
+const NEEDOK=false;
 const RK='irojeong.order.test.req';
 let REQ={}; try{ REQ=JSON.parse(localStorage.getItem(RK)||'{}'); }catch(e){}
 function saveReq(){ try{ localStorage.setItem(RK,JSON.stringify(REQ)); }catch(e){} }
@@ -790,6 +804,54 @@ function notifyOK(v,by){
 }
 function askNoti(){
   try{ if(window.Notification && Notification.permission==='default') Notification.requestPermission(); }catch(e){}
+}
+const DK='irojeong.dev.id';
+function devId(){ let d=localStorage.getItem(DK); if(!d){ d='D'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); localStorage.setItem(DK,d);} return d; }
+let GSTORE=localStorage.getItem('irojeong.store')||'', gateT=null;
+function gstPaint(){ document.querySelectorAll('.gst button').forEach(function(b){ b.className = b.dataset.s===GSTORE?'on':''; }); gsendOK(); }
+function gsendOK(){ const n=($('#g-name').value||'').trim(); $('#g-send').disabled = !(n && GSTORE); }
+function gateShow(on){ $('#gate').hidden=!on; document.body.style.overflow = on?'hidden':''; }
+async function gateCheck(){
+  try{
+    const r = await fetch(API+'?action=me&dev='+encodeURIComponent(devId())+'&t='+Date.now()).then(x=>x.json());
+    if(r && r.ok && r.state==='허용'){
+      gateShow(false);
+      if(r.name && !S.who){ S.who=r.name; const w=$('#s-who'); if(w) w.value=r.name; save(); }
+      if(r.store){ localStorage.setItem('irojeong.store', r.store); }
+      clearInterval(gateT); gateT=null; return;
+    }
+    gateShow(true);
+    if(r && r.state==='대기'){
+      $('#g-title').textContent='허가를 기다리는 중입니다';
+      $('#g-msg').textContent='사장님이 허가하면 바로 열립니다. 이 화면을 켜두십시오.';
+      $('#g-form').hidden=true;
+    } else if(r && r.state==='차단'){
+      $('#g-title').textContent='사용이 중지되었습니다';
+      $('#g-msg').textContent='사장님께 문의하십시오.';
+      $('#g-form').hidden=true;
+    } else {
+      $('#g-title').textContent='사용 신청';
+      $('#g-msg').textContent='이름을 적고 매장을 고른 뒤 신청하십시오.';
+      $('#g-form').hidden=false;
+    }
+  }catch(e){
+    gateShow(true);
+    $('#g-title').textContent='연결을 확인하십시오';
+    $('#g-msg').textContent='인터넷이 끄겨 있습니다. 연결되면 저절로 열립니다.';
+    $('#g-form').hidden=true;
+  }
+  if(!gateT) gateT=setInterval(gateCheck,6000);
+}
+async function gateJoin(){
+  const n=($('#g-name').value||'').trim(); if(!n||!GSTORE) return;
+  const b=$('#g-send'); b.disabled=true; b.textContent='보내는 중...';
+  try{
+    await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'join',dev:devId(),name:n,store:GSTORE})});
+    localStorage.setItem('irojeong.store',GSTORE);
+  }catch(e){}
+  b.textContent='사용 신청하기';
+  gateCheck();
 }
 function drawSlip(){
   const v=S.vendor;
@@ -831,7 +893,7 @@ function drawSlip(){
     $('#s-copy').className = phone?'second':(ok?'second':'primary'); }
   { const ka=$('#s-kakao'), kk=KAKAO[v], lock2=!!ds&&!S.dest[v]; const okk=!!kk&&!phone&&!lock2; ka.hidden=!okk; if(okk){ ka.href=kakaoHref(); ka.textContent = '문구 복사 후 카톡 열기'; } if(okk) $('#s-copy').className='second'; else $('#s-copy').className='primary'; }
   $('#s-copy').textContent = keep ? '다시 복사' : '문구 복사';
-  { let q=REQ[v];
+  if(NEEDOK){ let q=REQ[v];
     if(q && !keep && q.text!==slipText(v)){ delete REQ[v]; saveReq(); q=null; }
     const okA = !!(q && q.state==='승인');
     const ap=$('#s-appr'), ask=$('#s-ask');
@@ -846,7 +908,7 @@ function drawSlip(){
     if(!okA){ $('#s-sms').hidden=true; $('#s-kakao').hidden=true; $('#s-copy').disabled=true; }
     else { const go = !$('#s-kakao').hidden ? $('#s-kakao') : (!$('#s-sms').hidden ? $('#s-sms') : $('#s-copy')); if(go) go.classList.add('pulse'); }
     if(q && q.state==='대기') poll(v);
-  }
+  } else { $('#s-appr').hidden=true; $('#s-ask').hidden=true; }
 }
 function toast(m){const t=$('#s-toast');t.textContent=m;clearTimeout(t._t);
   t._t=setTimeout(()=>{t.textContent=''},2600)}
@@ -962,6 +1024,10 @@ $('#s-kakao').addEventListener('click',e=>{
   setTimeout(()=>{ picked(v).forEach(r=>setQty(v,r[0],0)); if(S.on&&!picked(v).length)S.on=false; save(); render(); },800);
 });
 $('#s-ask').addEventListener('click',function(e){ e.preventDefault(); askApproval(); });
+document.querySelectorAll('.gst button').forEach(function(b){ b.addEventListener('click',function(){ GSTORE=b.dataset.s; gstPaint(); }); });
+$('#g-name').addEventListener('input', gsendOK);
+$('#g-send').addEventListener('click', gateJoin);
+gstPaint(); gateCheck();
 $('#s-close').addEventListener('click',()=>{$('#sheet').hidden=true;document.body.style.overflow=''});
 $('#s-date').addEventListener('change',drawSlip);
 $('#s-who').addEventListener('input',e=>{S.who=e.target.value;save();drawSlip()});
