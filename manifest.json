@@ -1,0 +1,17 @@
+{
+ "name": "이로정 발주",
+ "short_name": "이로정 발주",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#8C3A2B",
+ "theme_color": "#8C3A2B",
+ "icons": [
+  {
+   "src": "icon.svg",
+   "sizes": "any",
+   "type": "image/svg+xml",
+   "purpose": "any maskable"
+  }
+ ]
+}
