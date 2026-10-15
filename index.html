@@ -810,7 +810,7 @@ async function admPwSend(){
   b.disabled=true; b.textContent='확인 중...';
   try{
     const r=await fetch(API+'?action=admin&pin='+encodeURIComponent(p)+'&dev='+encodeURIComponent(devId())+'&t='+Date.now()).then(x=>x.json());
-    if(r && r.ok){ try{ localStorage.setItem('irojeong.adm.pin',p); }catch(e){} admSet(true); gateShow(false); if(gateT){ clearInterval(gateT); gateT=null; } admPwShow(false); admShow(true); }
+    if(r && r.ok){ try{ localStorage.setItem('irojeong.adm.pin',p); localStorage.setItem('irojeong.adm.on','1'); }catch(e){} admSet(true); gateShow(false); if(gateT){ clearInterval(gateT); gateT=null; } admPwShow(false); admShow(true); }
     else msg.textContent='비밀번호가 다릅니다.';
   }catch(e){ msg.textContent='연결을 확인하십시오.'; }
   b.disabled=false; b.textContent='확인';
@@ -846,6 +846,8 @@ function admTap(){
   if(admTaps>=5){ admTaps=0; if(ADM) admShow(true); else admPwShow(true); }
 }
 function admInit(){
+  let saved=false; try{ saved = localStorage.getItem('irojeong.adm.on')==='1'; }catch(e){}
+  if(saved){ admSet(true); gateShow(false); }
   const seal=document.querySelector('.top .seal');
   if(seal){
     seal.addEventListener('click',admTap);
@@ -866,7 +868,7 @@ function admInit(){
   if(fb) fb.addEventListener('click',async ()=>{
     if(fb.dataset.armed!=='1'){ fb.dataset.armed='1'; fb.textContent='한 번 더 누르면 해제'; setTimeout(()=>{ fb.dataset.armed=''; fb.textContent='관리 해제'; },4000); return; }
     try{ await fetch(API+'?action=admin&off=1&pin='+encodeURIComponent(admPinGet())+'&dev='+encodeURIComponent(devId())+'&t='+Date.now()); }catch(e){}
-    try{ localStorage.removeItem('irojeong.adm.pin'); }catch(e){}
+    try{ localStorage.removeItem('irojeong.adm.pin'); localStorage.removeItem('irojeong.adm.on'); }catch(e){}
     fb.dataset.armed=''; fb.textContent='관리 해제'; admSet(false); admShow(false);
   });
   const al=$('#adm-list');
@@ -888,7 +890,7 @@ async function gateCheck(){
   gateBusy=true;
   try{
     const r = await fetch(API+'?action=me&dev='+encodeURIComponent(devId())+'&t='+Date.now()).then(x=>x.json());
-    if(r && r.ok){ admSet(!!r.admin); }
+    if(r && r.ok){ admSet(!!r.admin); try{ if(r.admin) localStorage.setItem('irojeong.adm.on','1'); else localStorage.removeItem('irojeong.adm.on'); }catch(e){} }
     if(r && r.ok && r.admin){
       gateShow(false);
       if(r.name && !S.who){ S.who=r.name; const w=$('#s-who'); if(w) w.value=r.name; save(); }
