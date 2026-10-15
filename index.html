@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="이로정 발주">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#96321F">
+<meta name="theme-color" content="#F4F1E9">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" href="icon.svg">
@@ -25,9 +25,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
 :root{
-  --bg:#FCF9F5; --surface:#FFFFFF; --fill:#F4EDE4; --fill2:#F8F2EA;
-  --ink:#241C18; --sub:#6B5A4D; --mute:#A8998C; --line:#E7DDD2; --line2:#F2EBE3;
-  --brand:#8C3A2B; --brand-dk:#6E2A1E;
+  --bg:#F4F1E9; --surface:#FDFBF6; --fill:#EBE5D8; --fill2:#F1ECE1;
+  --ink:#23201D; --sub:#685D50; --mute:#9A8E7E; --line:#DFD7C7; --line2:#EBE5D9;
+  --brand:#B2392C; --brand-dk:#8E2C21;
   --ok:#1F6B4A; --okbg:#E3EFE7; --okrow:#F2F7F3;
   --red:#B3261E; --redbg:#FBEDEB; --gold:#D9A23C; --star:#DCD1C4;
   --sans:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;
@@ -36,7 +36,7 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#17120F; --surface:#1E1815; --fill:#2A221D; --fill2:#221B17;
   --ink:#F2EAE2; --sub:#BCA998; --mute:#948374; --line:#33281F; --line2:#272019;
-  --brand:#E09A82; --brand-dk:#C77F66;
+  --brand:#E8927C; --brand-dk:#CE7762;
   --ok:#5FBF8E; --okbg:#1B2B23; --okrow:#17211C;
   --red:#FF8A80; --redbg:#2A1917; --gold:#E0B35E; --star:#3E342C;
   color-scheme:dark;
@@ -44,7 +44,7 @@
 :root[data-theme="dark"]{
   --bg:#17120F; --surface:#1E1815; --fill:#2A221D; --fill2:#221B17;
   --ink:#F2EAE2; --sub:#BCA998; --mute:#948374; --line:#33281F; --line2:#272019;
-  --brand:#E09A82; --brand-dk:#C77F66;
+  --brand:#E8927C; --brand-dk:#CE7762;
   --ok:#5FBF8E; --okbg:#1B2B23; --okrow:#17211C;
   --red:#FF8A80; --redbg:#2A1917; --gold:#E0B35E; --star:#3E342C;
   color-scheme:dark;
@@ -62,9 +62,14 @@ button{cursor:pointer;background:none;border:0;-webkit-tap-highlight-color:trans
 
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
 .top-in{max-width:620px;margin:0 auto;padding:18px 20px 0}
-.brand{display:flex;align-items:flex-end;gap:10px}
-.brand .mj{display:block;font-family:var(--serif);font-weight:800;font-size:14px;color:var(--brand);
-  letter-spacing:5px;text-indent:5px;line-height:1;margin-bottom:5px}
+.brand{display:flex;align-items:center;gap:9px}
+.seal{display:inline-flex;align-items:center;justify-content:center;
+  writing-mode:vertical-rl;text-orientation:upright;
+  background:var(--brand);color:#FBF1EC;font-family:var(--serif);font-weight:800;
+  font-size:11px;letter-spacing:1.5px;line-height:1;width:21px;height:42px;
+  border-radius:4px;flex:none;user-select:none}
+.brand .mj{display:block;font-family:var(--serif);font-weight:800;font-size:15px;color:var(--brand);
+  letter-spacing:2px;line-height:1}
 .brand h1{margin:0;font-weight:800;font-size:26px;letter-spacing:-1.1px;line-height:1}
 .brand .sub{margin-left:auto;font-size:12px;color:var(--mute);font-weight:600;padding-bottom:3px}
 
@@ -283,6 +288,7 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
 <div class="top">
   <div class="top-in">
     <div class="brand">
+      <span class="seal" aria-hidden="true">理老亭</span>
       <span class="mj">이로정</span>
       <h1>발주</h1>
       <span class="sub" id="today"></span>
