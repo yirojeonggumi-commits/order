@@ -41,28 +41,24 @@ pre{margin:0;white-space:pre-wrap;font:inherit;background:var(--bg);border-radiu
 <body>
 <div class="wrap">
 <h1><span class="seal">理老亭</span>발주 승인</h1>
-<p class="sub">테스트판</p>
+<p class="sub">사용자 허가 · 테스트판</p>
 <div id="gate">
   <input id="pin" type="tel" inputmode="numeric" placeholder="비밀번호" autocomplete="off">
   <button class="go" id="enter">들어가기</button>
   <p class="sub" style="padding:10px 0 0">기본 비밀번호 1234</p>
 </div>
 <div id="main" hidden>
-  <div class="who">
-    <button data-w="사장님">사장님</button>
-    <button data-w="점장">점장</button>
-  </div>
-  <div class="who" style="margin-bottom:12px">    <button id="tb-u" class="on">사용자 허가</button>    <button id="tb-r">발주 요청</button>  </div>  <div class="bar"><span class="meta" id="upd"></span><button class="link" id="ref">새로고침</button></div>  <div id="ulist"></div>
+  <div class="bar"><span class="meta" id="upd"></span><button class="link" id="ref">새로고침</button></div>  <div id="ulist"></div>
   <div id="list"></div>
 </div>
 </div>
 <script>
 var API="https://script.google.com/macros/s/AKfycbwk90riQRjotfLfoK03mSa28OyUQ1twt67xzoS2xcMs0a9YWMa2-Mkgs7scV58qft7k/exec";
 var $=function(s){return document.querySelector(s)};
-var PIN="", WHO=localStorage.getItem("appr.who")||"사장님", rows=[];
+var PIN="", WHO="사장님", rows=[];
 function esc(t){return String(t==null?"":t).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
-function paintWho(){ [].forEach.call(document.querySelectorAll(".who button"),function(b){ b.className = b.dataset.w===WHO?"on":"" }) }
-[].forEach.call(document.querySelectorAll(".who button"),function(b){ b.onclick=function(){ WHO=b.dataset.w; localStorage.setItem("appr.who",WHO); paintWho(); } });
+function paintWho(){}
+
 function tag(s){ return s==="승인"?"t-ok":(s==="반려"?"t-no":"t-wait") }
 function draw(){
   if(!rows.length){ $("#list").innerHTML="<div class='empty'>요청이 없습니다</div>"; return }
@@ -97,14 +93,12 @@ $('#ulist').addEventListener('click', async function(e){
   try{ await fetch(API+'?action=setuser&pin='+encodeURIComponent(PIN)+'&dev='+encodeURIComponent(b.dataset.dev)+'&state='+b.dataset.s+'&by='+encodeURIComponent(WHO)); }catch(err){}
   load();
 });
-function setTab(t){ TAB=t; $('#tb-u').className = t==='u'?'on':''; $('#tb-r').className = t==='r'?'on':'';
-  $('#ulist').hidden = t!=='u'; $('#list').hidden = t!=='r'; load(); }
-$('#tb-u').onclick=function(){setTab('u')}; $('#tb-r').onclick=function(){setTab('r')};
+function setTab(t){ TAB='u'; $('#ulist').hidden=false; $('#list').hidden=true; load(); }
 async function load(){
   try{
     var r = await fetch(API+"?action=list&pin="+encodeURIComponent(PIN)+"&t="+Date.now()).then(function(x){return x.json()});
     if(!r.ok){ alert("비밀번호가 맞지 않습니다"); $("#main").hidden=true; $("#gate").hidden=false; return }
-    rows=r.rows||[]; draw();
+    rows=[];
     try{ var ru = await fetch(API+'?action=users&pin='+encodeURIComponent(PIN)+'&t='+Date.now()).then(function(x){return x.json()});
       if(ru&&ru.ok){ users=ru.users||[]; udraw(); } }catch(e2){}
     var d=new Date(); $("#upd").textContent="마지막 확인 "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
