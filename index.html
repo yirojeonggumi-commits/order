@@ -256,19 +256,7 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
 .legend span{display:flex;align-items:center;gap:6px}
 .legend em{font-style:normal;width:16px;height:16px;border-radius:6px;flex:none}
 
-
-#splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
-  background:var(--bg);
-  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
-  transition:opacity .55s ease}
-#splash.out{opacity:0;pointer-events:none}
-#splash .sign{width:58vmin;max-width:270px;height:auto;border-radius:22%;display:block}
-@media (prefers-reduced-motion:reduce){#splash{transition:none}}
 </style>
-
-<div id="splash" aria-hidden="true">
-  <img class="sign" src="icon-512.png" alt="" width="512" height="512" fetchpriority="high">
-</div>
 
 <div class="top">
   <div class="top-in">
@@ -917,13 +905,6 @@ $('#s-date').value=new Date().toLocaleDateString('sv-SE');
 render();
 
 
-
-(function(){
-  var sp=document.getElementById('splash'); if(!sp)return;
-  var go=function(){sp.classList.add('out');setTimeout(function(){sp.remove()},600)};
-  setTimeout(go,2000);
-  sp.addEventListener('click',go);
-})();
 
 if('serviceWorker' in navigator){ addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
 </script>
