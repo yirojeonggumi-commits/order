@@ -30,6 +30,7 @@ button{cursor:pointer;border:0;border-radius:12px;padding:13px 16px;font-weight:
 pre{margin:0;white-space:pre-wrap;font:inherit;background:var(--bg);border-radius:10px;padding:11px 12px;color:var(--sub)}
 .row{display:flex;gap:8px;margin-top:11px}
 .yes{flex:1;background:var(--ok);color:#fff}.no{flex:1;background:#EFE2E0;color:var(--red)}
+.del{flex:1;background:var(--surface);border:1px solid var(--line);color:var(--mute)}
 .who{display:flex;gap:8px;margin:0 0 14px}
 .who button{flex:1;background:var(--surface);border:1px solid var(--line);color:var(--sub)}
 .who button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -80,15 +81,17 @@ function utag(st){ return st==='허용'?'t-ok':(st==='차단'?'t-no':'t-wait') }
 function udraw(){
   if(!users.length){ $('#ulist').innerHTML="<div class='empty'>신청한 사람이 없습니다</div>"; return }
   $('#ulist').innerHTML = users.map(function(u){
+    var del = "<button class='del' data-dev='"+u.dev+"' data-s='delete'>삭제</button>";
     var btn = u.state==='허용'
-      ? "<div class='row'><button class='no' data-dev='"+u.dev+"' data-s='block'>차단하기</button></div>"
-      : "<div class='row'><button class='yes' data-dev='"+u.dev+"' data-s='allow'>허가</button><button class='no' data-dev='"+u.dev+"' data-s='block'>거부</button></div>";
+      ? "<div class='row'><button class='no' data-dev='"+u.dev+"' data-s='block'>차단하기</button>"+del+"</div>"
+      : "<div class='row'><button class='yes' data-dev='"+u.dev+"' data-s='allow'>허가</button><button class='no' data-dev='"+u.dev+"' data-s='block'>차단</button>"+del+"</div>";
     return "<div class='card'><div class='hd'>"+esc(u.name||'(이름없음)')+"<span class='tag "+utag(u.state)+"'>"+esc(u.state)+"</span></div>"+
       "<div class='meta'>"+esc(u.store||'')+" · "+esc(u.at)+(u.by?" · 처리 "+esc(u.by):"")+"</div>"+btn+"</div>";
   }).join('');
 }
 $('#ulist').addEventListener('click', async function(e){
   var b=e.target.closest('button[data-dev]'); if(!b) return;
+  if(b.dataset.s==='delete' && !confirm('목록에서 완전히 지울까요?\n지우면 그 사람이 다시 신청할 수 있습니다.')) return;
   b.disabled=true; b.textContent='처리 중';
   try{ await fetch(API+'?action=setuser&pin='+encodeURIComponent(PIN)+'&dev='+encodeURIComponent(b.dataset.dev)+'&state='+b.dataset.s+'&by='+encodeURIComponent(WHO)); }catch(err){}
   load();
