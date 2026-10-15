@@ -776,7 +776,7 @@ function drawSlip(){
     a.hidden=!ok;
     if(ok) a.href=smsUrl(c.t, keep ? sent.t : slipText(v));
     $('#s-copy').className = phone?'second':(ok?'second':'primary'); }
-  { const ka=$('#s-kakao'), kk=KAKAO[v], lock2=!!ds&&!S.dest[v]; const okk=!!kk&&!phone&&!lock2; ka.hidden=!okk; if(okk) $('#s-copy').className='second'; else $('#s-copy').className='primary'; }
+  { const ka=$('#s-kakao'), kk=KAKAO[v], lock2=!!ds&&!S.dest[v]; const okk=!!kk&&!phone&&!lock2; ka.hidden=!okk; if(okk) ka.href=kakaoHref(); if(okk) $('#s-copy').className='second'; else $('#s-copy').className='primary'; }
   $('#s-copy').textContent = keep ? '다시 복사' : '문구 복사';
 }
 function toast(m){const t=$('#s-toast');t.textContent=m;clearTimeout(t._t);
@@ -880,15 +880,17 @@ $('#make').addEventListener('click',()=>{
   $('#s-who').value=S.who;
   drawSlip();$('#sheet').hidden=false;document.body.style.overflow='hidden';
 });
-$('#s-kakao').addEventListener('click',e=>{
-  e.preventDefault();
+function kakaoHref(){ return /Android/i.test(navigator.userAgent||'') ? 'intent://#Intent;scheme=kakaotalk;package=com.kakao.talk;end' : 'kakaotalk://'; }
+function copyNow(t){
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t); return true; } }catch(e){}
+  try{ const ta=document.createElement('textarea'); ta.value=t; ta.setAttribute('readonly',''); ta.style.cssText='position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,t.length); const ok=document.execCommand('copy'); document.body.removeChild(ta); return ok; }catch(e){}
+  return false;
+}
+$('#s-kakao').addEventListener('click',()=>{
   const v=S.vendor, t=slipText(v);
-  try{navigator.clipboard.writeText(t);}catch(err){}
+  copyNow(t);
   sent={v:v,t:t};
-  picked(v).forEach(r=>setQty(v,r[0],0));
-  if(S.on&&!picked(v).length)S.on=false;
-  save(); render();
-  location.href=KAKAO[v]||'kakaotalk://';
+  setTimeout(()=>{ picked(v).forEach(r=>setQty(v,r[0],0)); if(S.on&&!picked(v).length)S.on=false; save(); render(); },600);
 });
 $('#s-close').addEventListener('click',()=>{$('#sheet').hidden=true;document.body.style.overflow=''});
 $('#s-date').addEventListener('change',drawSlip);
