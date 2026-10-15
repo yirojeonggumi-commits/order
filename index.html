@@ -289,7 +289,24 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
 .u-yes{background:#1F7A4D;color:#fff}.u-no{background:#F3E0DF;color:var(--brand)}
 .u-del{background:var(--surface);border:1px solid var(--line);color:var(--sub)}
 .u-empty{color:var(--sub);text-align:center;padding:44px 0}
+.top .seal{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:pointer}
+#admpw{position:fixed;inset:0;z-index:980;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+#admpw .gbox{text-align:center}
+#admpw-in{width:100%;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font:inherit;color:inherit;text-align:center;letter-spacing:4px}
+.pwmsg{min-height:18px;color:var(--brand);font-size:13px;margin:10px 0 4px}
+#admpw .gsend{margin-top:4px}
+.pwcancel{width:100%;margin-top:9px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--sub);font-weight:700}
 </style>
+
+<div id="admpw" hidden><div class="gbox">
+  <span class="seal">理老亭</span>
+  <h2>관리자 등록</h2>
+  <p>이 기기에서 사용자 허가를 관리하려면 비밀번호를 넣으십시오.</p>
+  <input id="admpw-in" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호">
+  <p id="admpw-msg" class="pwmsg"></p>
+  <button type="button" id="admpw-ok" class="gsend">확인</button>
+  <button type="button" id="admpw-cancel" class="pwcancel">취소</button>
+</div></div>
 
 <div id="adm" hidden>
   <div class="adm-bar"><h2>사용자 허가</h2><div><button type="button" id="adm-off">관리 해제</button> <button type="button" id="adm-ref">새로고침</button> <button type="button" id="adm-close">닫기</button></div></div>
@@ -782,28 +799,34 @@ function gstPaint(){ document.querySelectorAll('.gst button').forEach(function(b
 function gsendOK(){ const n=($('#g-name').value||'').trim(); $('#g-send').disabled = !(n && GSTORE); }
 function gateShow(on){ $('#gate').hidden=!on; document.body.style.overflow = on?'hidden':''; }
 /* ===== 관리(사장 전용) ===== */
-let ADM=false, admHold=null;
+let ADM=false, admHold=null, admTaps=0, admTapT=0, admArm=null;
+function admPinGet(){ try{ return localStorage.getItem('irojeong.adm.pin')||''; }catch(e){ return ''; } }
 function admSet(on){ ADM=on; const b=$('#adm-open'); if(b) b.className = on?'on':''; }
-function admShow(on){ $('#adm').hidden=!on; document.body.style.overflow = on?'hidden':''; if(on) admLoad(); }
-function ADMPIN(){ let p=localStorage.getItem('irojeong.adm.pin'); if(!p){ p=prompt('관리 비밀번호')||''; if(p) localStorage.setItem('irojeong.adm.pin',p); } return p; }
-function admPin(){
-  const p=prompt('관리 비밀번호');
-  if(p===null||p==='') return;
-  fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'admin',pin:p,dev:devId()})})
-    .then(x=>x.json()).then(r=>{ if(r&&r.ok){ localStorage.setItem('irojeong.adm.pin',p); admSet(true); alert('이 기기를 관리자로 기억했습니다.'); } else alert('비밀번호가 다릅니다.'); })
-    .catch(()=>alert('연결을 확인하십시오.'));
+function admShow(on){ const p=$('#adm'); if(!p) return; p.hidden=!on; document.body.style.overflow = on?'hidden':''; if(on) admLoad(); }
+function admPwShow(on){ const p=$('#admpw'); if(!p) return; p.hidden=!on; document.body.style.overflow = on?'hidden':''; const i=$('#admpw-in'); if(on&&i){ i.value=''; $('#admpw-msg').textContent=''; setTimeout(()=>i.focus(),120); } }
+async function admPwSend(){
+  const i=$('#admpw-in'), msg=$('#admpw-msg'), b=$('#admpw-ok');
+  const p=(i.value||'').trim(); if(!p){ msg.textContent='비밀번호를 넣으십시오.'; return; }
+  b.disabled=true; b.textContent='확인 중...';
+  try{
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'admin',pin:p,dev:devId()})}).then(x=>x.json());
+    if(r && r.ok){ try{ localStorage.setItem('irojeong.adm.pin',p); }catch(e){} admSet(true); admPwShow(false); admShow(true); }
+    else msg.textContent='비밀번호가 다릅니다.';
+  }catch(e){ msg.textContent='연결을 확인하십시오.'; }
+  b.disabled=false; b.textContent='확인';
 }
 function admTag(s){ return s==='허용'?'ok':(s==='차단'?'no':''); }
 function esc2(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 async function admLoad(){
-  const box=$('#adm-list');
+  const box=$('#adm-list'); if(!box) return;
+  admArm=null;
   try{
-    const r=await fetch(API+'?action=users&pin='+encodeURIComponent(ADMPIN())+'&t='+Date.now()).then(x=>x.json());
-    if(!r||!r.ok){ box.innerHTML="<div class='u-empty'>비밀번호가 다릅니다</div>"; localStorage.removeItem('irojeong.adm.pin'); return; }
+    const r=await fetch(API+'?action=users&pin='+encodeURIComponent(admPinGet())+'&t='+Date.now()).then(x=>x.json());
+    if(!r||!r.ok){ box.innerHTML="<div class='u-empty'>비밀번호를 다시 등록해 주십시오</div>"; return; }
     if(!r.users.length){ box.innerHTML="<div class='u-empty'>신청한 사람이 없습니다</div>"; return; }
     box.innerHTML = r.users.map(u=>{
       const d=esc2(u.dev);
-      const del = "<button class='u-del' data-dev='"+d+"' data-s='delete'>삭제</button>";
+      const del="<button class='u-del' data-dev='"+d+"' data-s='delete'>삭제</button>";
       const row = u.state==='허용'
         ? "<div class='urow'><button class='u-no' data-dev='"+d+"' data-s='block'>차단하기</button>"+del+"</div>"
         : "<div class='urow'><button class='u-yes' data-dev='"+d+"' data-s='allow'>허가</button><button class='u-no' data-dev='"+d+"' data-s='block'>차단</button>"+del+"</div>";
@@ -812,30 +835,50 @@ async function admLoad(){
     }).join('');
   }catch(e){ box.innerHTML="<div class='u-empty'>연결을 확인하십시오</div>"; }
 }
+async function admDo(dev,state){
+  try{ await fetch(API+'?action=setuser&pin='+encodeURIComponent(admPinGet())+'&dev='+encodeURIComponent(dev)+'&state='+state+'&by='+encodeURIComponent('사장님')); }catch(e){}
+  admLoad();
+}
+function admTap(){
+  const now=Date.now();
+  if(now-admTapT>1800) admTaps=0;
+  admTapT=now; admTaps++;
+  if(admTaps>=5){ admTaps=0; if(ADM) admShow(true); else admPwShow(true); }
+}
 function admInit(){
   const seal=document.querySelector('.top .seal');
   if(seal){
-    const start=()=>{ admHold=setTimeout(admPin,1200); };
-    const stop=()=>{ clearTimeout(admHold); };
-    seal.addEventListener('touchstart',start,{passive:true}); seal.addEventListener('touchend',stop);
-    seal.addEventListener('touchmove',stop,{passive:true}); seal.addEventListener('mousedown',start); seal.addEventListener('mouseup',stop); seal.addEventListener('mouseleave',stop);
+    seal.addEventListener('click',admTap);
+    const st=()=>{ clearTimeout(admHold); admHold=setTimeout(()=>{ if(ADM) admShow(true); else admPwShow(true); },1100); };
+    const sp=()=>{ clearTimeout(admHold); };
+    seal.addEventListener('touchstart',st,{passive:true});
+    seal.addEventListener('touchend',sp); seal.addEventListener('touchmove',sp,{passive:true}); seal.addEventListener('touchcancel',sp);
+    seal.addEventListener('mousedown',st); seal.addEventListener('mouseup',sp); seal.addEventListener('mouseleave',sp);
+    seal.addEventListener('contextmenu',ev=>ev.preventDefault());
   }
   const ob=$('#adm-open'); if(ob) ob.addEventListener('click',()=>admShow(true));
   const cb=$('#adm-close'); if(cb) cb.addEventListener('click',()=>admShow(false));
   const rb=$('#adm-ref'); if(rb) rb.addEventListener('click',admLoad);
+  const pc=$('#admpw-cancel'); if(pc) pc.addEventListener('click',()=>admPwShow(false));
+  const po=$('#admpw-ok'); if(po) po.addEventListener('click',admPwSend);
+  const pi=$('#admpw-in'); if(pi) pi.addEventListener('keydown',ev=>{ if(ev.key==='Enter') admPwSend(); });
   const fb=$('#adm-off');
   if(fb) fb.addEventListener('click',async ()=>{
-    if(!confirm('이 기기에서 관리 기능을 없앨까요?\n나중에 도장을 길게 눌러 다시 등록할 수 있습니다.')) return;
-    try{ await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'admin',pin:ADMPIN(),dev:devId(),off:'1'})}); }catch(e){}
-    localStorage.removeItem('irojeong.adm.pin'); admSet(false); admShow(false);
+    if(fb.dataset.armed!=='1'){ fb.dataset.armed='1'; fb.textContent='한 번 더 누르면 해제'; setTimeout(()=>{ fb.dataset.armed=''; fb.textContent='관리 해제'; },4000); return; }
+    try{ await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'admin',pin:admPinGet(),dev:devId(),off:'1'})}); }catch(e){}
+    try{ localStorage.removeItem('irojeong.adm.pin'); }catch(e){}
+    fb.dataset.armed=''; fb.textContent='관리 해제'; admSet(false); admShow(false);
   });
   const al=$('#adm-list');
-  if(al) al.addEventListener('click',async e=>{
+  if(al) al.addEventListener('click',e=>{
     const b=e.target.closest('button[data-dev]'); if(!b) return;
-    if(b.dataset.s==='delete' && !confirm('목록에서 완전히 지울까요?\n지우면 그 사람이 다시 신청할 수 있습니다.')) return;
+    if(b.dataset.s==='delete'){
+      if(admArm!==b){ if(admArm){ admArm.textContent='삭제'; } admArm=b; b.textContent='정말 삭제?';
+        setTimeout(()=>{ if(admArm===b){ b.textContent='삭제'; admArm=null; } },4000); return; }
+      admArm=null;
+    }
     b.disabled=true; b.textContent='처리 중';
-    try{ await fetch(API+'?action=setuser&pin='+encodeURIComponent(ADMPIN())+'&dev='+encodeURIComponent(b.dataset.dev)+'&state='+b.dataset.s+'&by='+encodeURIComponent('사장님')); }catch(err){}
-    admLoad();
+    admDo(b.dataset.dev, b.dataset.s);
   });
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',admInit); else admInit();
