@@ -880,7 +880,7 @@ $('#make').addEventListener('click',()=>{
   $('#s-who').value=S.who;
   drawSlip();$('#sheet').hidden=false;document.body.style.overflow='hidden';
 });
-function kakaoHref(){ return /Android/i.test(navigator.userAgent||'') ? 'intent://#Intent;scheme=kakaotalk;package=com.kakao.talk;end' : 'kakaotalk://'; }
+function kakaoHref(){ return /Android/i.test(navigator.userAgent||'') ? 'intent:#Intent;package=com.kakao.talk;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end' : 'kakaotalk://'; }
 function copyNow(t){
   try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t); return true; } }catch(e){}
   try{ const ta=document.createElement('textarea'); ta.value=t; ta.setAttribute('readonly',''); ta.style.cssText='position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,t.length); const ok=document.execCommand('copy'); document.body.removeChild(ta); return ok; }catch(e){}
