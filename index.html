@@ -810,7 +810,7 @@ async function admPwSend(){
   b.disabled=true; b.textContent='확인 중...';
   try{
     const r=await fetch(API+'?action=admin&pin='+encodeURIComponent(p)+'&dev='+encodeURIComponent(devId())+'&t='+Date.now()).then(x=>x.json());
-    if(r && r.ok){ try{ localStorage.setItem('irojeong.adm.pin',p); }catch(e){} admSet(true); admPwShow(false); admShow(true); }
+    if(r && r.ok){ try{ localStorage.setItem('irojeong.adm.pin',p); }catch(e){} admSet(true); gateShow(false); if(gateT){ clearInterval(gateT); gateT=null; } admPwShow(false); admShow(true); }
     else msg.textContent='비밀번호가 다릅니다.';
   }catch(e){ msg.textContent='연결을 확인하십시오.'; }
   b.disabled=false; b.textContent='확인';
@@ -889,6 +889,12 @@ async function gateCheck(){
   try{
     const r = await fetch(API+'?action=me&dev='+encodeURIComponent(devId())+'&t='+Date.now()).then(x=>x.json());
     if(r && r.ok){ admSet(!!r.admin); }
+    if(r && r.ok && r.admin){
+      gateShow(false);
+      if(r.name && !S.who){ S.who=r.name; const w=$('#s-who'); if(w) w.value=r.name; save(); }
+      if(r.store){ localStorage.setItem('irojeong.store', r.store); }
+      clearInterval(gateT); gateT=null; gateBusy=false; return;
+    }
     if(r && r.ok && r.state==='허용'){
       gateShow(false);
       if(r.name && !S.who){ S.who=r.name; const w=$('#s-who'); if(w) w.value=r.name; save(); }
