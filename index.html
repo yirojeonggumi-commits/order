@@ -273,6 +273,20 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
 @keyframes sgin{to{opacity:1;transform:translateY(0)}}
 @media (prefers-reduced-motion:reduce){#splash{transition:none}
   #splash .sign{animation:none;opacity:1;transform:none}*{transition:none!important}}
+
+/* 여는 화면 */
+#boot{position:fixed;inset:0;z-index:900;background:var(--bg);display:flex;
+  align-items:center;justify-content:center;
+  animation:bootOut .45s ease .85s forwards}
+#boot .mark{display:flex;flex-direction:column;align-items:center;gap:14px;
+  animation:bootIn .5s cubic-bezier(.2,.8,.3,1) both}
+#boot .seal{width:38px;height:76px;font-size:19px;letter-spacing:3px;border-radius:7px}
+#boot .nm{font-family:var(--serif);font-weight:800;font-size:38px;color:var(--ink);
+  letter-spacing:6px;text-indent:6px;line-height:1}
+#boot .en{font-size:12px;font-weight:700;color:var(--brand);letter-spacing:7px;text-indent:7px}
+@keyframes bootIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes bootOut{to{opacity:0;visibility:hidden}}
+@media (prefers-reduced-motion:reduce){#boot .mark{animation:none}}
 </style>
 
 <div id="splash" aria-hidden="true">
@@ -283,6 +297,8 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
     <div class="sb">발주</div>
   </div>
 </div>
+
+<div id="boot" aria-hidden="true"><div class="mark"><span class="seal">理老亭</span><span class="nm">이로정</span><span class="en">ORDER</span></div></div>
 
 <div class="top">
   <div class="top-in">
@@ -941,6 +957,7 @@ render();
 })();
 
 
+{ const bt=document.getElementById('boot'); if(bt) setTimeout(function(){ bt.remove(); },1400); }
 if('serviceWorker' in navigator){ addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
 </script>
 </body>
