@@ -263,6 +263,12 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
 .tbadge{font-size:11px;font-weight:800;color:#FFF;background:#3E6B63;border-radius:999px;
   padding:3px 9px;margin-left:8px;letter-spacing:0;line-height:1.5;flex:none;align-self:center}
 .top{box-shadow:inset 0 3px 0 #3E6B63}
+.appr{border-radius:12px;padding:11px 14px;font-size:14px;font-weight:700;margin-bottom:10px;
+  text-align:center;line-height:1.45}
+.appr.wait{background:var(--fill);color:var(--sub)}
+.appr.ok{background:var(--okbg);color:var(--ok)}
+.appr.no{background:var(--redbg);color:var(--red)}
+#s-ask{background:#3E6B63;color:#fff}
 </style>
 
 <div class="top">
@@ -331,6 +337,8 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
         <pre id="s-text"></pre>
       </div>
       <div class="acts">
+        <div class="appr" id="s-appr" hidden></div>
+        <a class="primary" id="s-ask" href="#">승인 요청</a>
         <a class="primary" id="s-sms" href="#">문자로 보내기</a>
         <a class="primary" id="s-kakao" href="#" hidden>문구 복사 후 카톡 열기</a><button type="button" class="primary" id="s-copy">문구 복사</button>
         <button type="button" class="done" id="s-done" hidden>발주 완료 · 목록 비우기</button>
@@ -740,6 +748,32 @@ function slipText(v){
   return hello+when+'\n\n'+body+'\n감사합니다 ^^';
 }
 let sent=null;
+const API='https://script.google.com/macros/s/AKfycbwk90riQRjotfLfoK03mSa28OyUQ1twt67xzoS2xcMs0a9YWMa2-Mkgs7scV58qft7k/exec';
+const RK='irojeong.order.test.req';
+let REQ={}; try{ REQ=JSON.parse(localStorage.getItem(RK)||'{}'); }catch(e){}
+function saveReq(){ try{ localStorage.setItem(RK,JSON.stringify(REQ)); }catch(e){} }
+let pollT=null;
+function poll(v){
+  clearTimeout(pollT);
+  const q=REQ[v]; if(!q||q.state!=='대기') return;
+  pollT=setTimeout(async function(){
+    try{
+      const r=await fetch(API+'?action=status&id='+encodeURIComponent(q.id)+'&t='+Date.now()).then(x=>x.json());
+      if(r&&r.ok&&r.state&&r.state!==q.state){ q.state=r.state; q.by=r.by||''; saveReq(); drawSlip(); }
+    }catch(e){}
+    poll(v);
+  },5000);
+}
+async function askApproval(){
+  const v=S.vendor, t=slipText(v);
+  const ask=$('#s-ask'); ask.textContent='보내는 중...';
+  try{
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'new',v:v,dest:S.dest[v]||'',who:S.who||'',text:t})}).then(x=>x.json());
+    if(r&&r.ok){ REQ[v]={id:r.id,state:'대기',text:t,by:''}; saveReq(); drawSlip(); poll(v); toast('승인 요청을 보냈습니다'); }
+    else { toast('요청 실패'); drawSlip(); }
+  }catch(e){ toast('인터넷을 확인하십시오'); drawSlip(); }
+}
 function drawSlip(){
   const v=S.vendor;
   if(picked(v).length)sent=null;
@@ -780,6 +814,21 @@ function drawSlip(){
     $('#s-copy').className = phone?'second':(ok?'second':'primary'); }
   { const ka=$('#s-kakao'), kk=KAKAO[v], lock2=!!ds&&!S.dest[v]; const okk=!!kk&&!phone&&!lock2; ka.hidden=!okk; if(okk){ ka.href=kakaoHref(); ka.textContent = '문구 복사 후 카톡 열기'; } if(okk) $('#s-copy').className='second'; else $('#s-copy').className='primary'; }
   $('#s-copy').textContent = keep ? '다시 복사' : '문구 복사';
+  { let q=REQ[v];
+    if(q && !keep && q.text!==slipText(v)){ delete REQ[v]; saveReq(); q=null; }
+    const okA = !!(q && q.state==='승인');
+    const ap=$('#s-appr'), ask=$('#s-ask');
+    ap.hidden = !q;
+    if(q){
+      ap.className='appr '+(q.state==='승인'?'ok':(q.state==='반려'?'no':'wait'));
+      ap.textContent = q.state==='승인' ? ('승인되었습니다'+(q.by?' · '+q.by:''))
+        : (q.state==='반려' ? '반려되었습니다 — 다시 요청하십시오' : '승인을 기다리는 중입니다');
+    }
+    ask.hidden = okA;
+    ask.textContent = (q && q.state==='대기') ? '다시 요청' : '승인 요청';
+    if(!okA){ $('#s-sms').hidden=true; $('#s-kakao').hidden=true; $('#s-copy').disabled=true; }
+    if(q && q.state==='대기') poll(v);
+  }
 }
 function toast(m){const t=$('#s-toast');t.textContent=m;clearTimeout(t._t);
   t._t=setTimeout(()=>{t.textContent=''},2600)}
@@ -894,6 +943,7 @@ $('#s-kakao').addEventListener('click',e=>{
   sent={v:v,t:t};
   setTimeout(()=>{ picked(v).forEach(r=>setQty(v,r[0],0)); if(S.on&&!picked(v).length)S.on=false; save(); render(); },800);
 });
+$('#s-ask').addEventListener('click',function(e){ e.preventDefault(); askApproval(); });
 $('#s-close').addEventListener('click',()=>{$('#sheet').hidden=true;document.body.style.overflow=''});
 $('#s-date').addEventListener('change',drawSlip);
 $('#s-who').addEventListener('input',e=>{S.who=e.target.value;save();drawSlip()});

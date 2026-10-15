@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F4F1E9">
+<title>발주 승인</title>
+<style>
+:root{--bg:#F4F1E9;--surface:#FDFBF6;--ink:#23201D;--sub:#685D50;--mute:#9A8E7E;
+  --line:#DFD7C7;--brand:#B2392C;--ok:#1F6B4A;--okbg:#E3EFE7;--red:#B3261E;--redbg:#FBEDEB;
+  --serif:'Nanum Myeongjo',serif}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,"Malgun Gothic","Noto Sans KR",sans-serif;
+  letter-spacing:-.2px;word-break:keep-all;-webkit-text-size-adjust:100%}
+.wrap{max-width:620px;margin:0 auto;padding:18px 16px 60px}
+h1{font-size:22px;margin:0 0 2px;display:flex;align-items:center;gap:9px}
+.seal{display:inline-flex;align-items:center;justify-content:center;writing-mode:vertical-rl;
+  text-orientation:upright;background:var(--brand);color:#FBF1EC;font-family:var(--serif);
+  font-weight:800;font-size:11px;letter-spacing:1.5px;width:21px;height:42px;border-radius:4px}
+.sub{color:var(--mute);font-size:13px;margin:0 0 16px;padding-left:30px}
+input,button{font:inherit;color:inherit}
+input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+button{cursor:pointer;border:0;border-radius:12px;padding:13px 16px;font-weight:700}
+.go{width:100%;background:var(--ink);color:#fff;margin-top:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:11px}
+.hd{display:flex;align-items:center;gap:7px;font-weight:800;font-size:15px}
+.tag{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px}
+.t-wait{background:#EFE7D6;color:#7A6B52}.t-ok{background:var(--okbg);color:var(--ok)}.t-no{background:var(--redbg);color:var(--red)}
+.meta{color:var(--mute);font-size:12px;margin:4px 0 9px}
+pre{margin:0;white-space:pre-wrap;font:inherit;background:var(--bg);border-radius:10px;padding:11px 12px;color:var(--sub)}
+.row{display:flex;gap:8px;margin-top:11px}
+.yes{flex:1;background:var(--ok);color:#fff}.no{flex:1;background:#EFE2E0;color:var(--red)}
+.who{display:flex;gap:8px;margin:0 0 14px}
+.who button{flex:1;background:var(--surface);border:1px solid var(--line);color:var(--sub)}
+.who button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.empty{color:var(--mute);text-align:center;padding:40px 0}
+.bar{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px}
+.link{background:none;color:var(--brand);padding:6px 0;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1><span class="seal">理老亭</span>발주 승인</h1>
+<p class="sub">테스트판</p>
+<div id="gate">
+  <input id="pin" type="tel" inputmode="numeric" placeholder="비밀번호" autocomplete="off">
+  <button class="go" id="enter">들어가기</button>
+  <p class="sub" style="padding:10px 0 0">기본 비밀번호 1234</p>
+</div>
+<div id="main" hidden>
+  <div class="who">
+    <button data-w="사장님">사장님</button>
+    <button data-w="점장">점장</button>
+  </div>
+  <div class="bar"><span class="meta" id="upd"></span><button class="link" id="ref">새로고침</button></div>
+  <div id="list"></div>
+</div>
+</div>
+<script>
+var API="https://script.google.com/macros/s/AKfycbwk90riQRjotfLfoK03mSa28OyUQ1twt67xzoS2xcMs0a9YWMa2-Mkgs7scV58qft7k/exec";
+var $=function(s){return document.querySelector(s)};
+var PIN="", WHO=localStorage.getItem("appr.who")||"사장님", rows=[];
+function esc(t){return String(t==null?"":t).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
+function paintWho(){ [].forEach.call(document.querySelectorAll(".who button"),function(b){ b.className = b.dataset.w===WHO?"on":"" }) }
+[].forEach.call(document.querySelectorAll(".who button"),function(b){ b.onclick=function(){ WHO=b.dataset.w; localStorage.setItem("appr.who",WHO); paintWho(); } });
+function tag(s){ return s==="승인"?"t-ok":(s==="반려"?"t-no":"t-wait") }
+function draw(){
+  if(!rows.length){ $("#list").innerHTML="<div class='empty'>요청이 없습니다</div>"; return }
+  $("#list").innerHTML = rows.map(function(r){
+    var act = r.state==="대기" ? "<div class='row'><button class='yes' data-id='"+r.id+"' data-s='approve'>승인</button><button class='no' data-id='"+r.id+"' data-s='reject'>반려</button></div>" : "";
+    return "<div class='card'><div class='hd'>"+esc(r.v)+(r.dest?" · "+esc(r.dest):"")+"<span class='tag "+tag(r.state)+"'>"+esc(r.state)+"</span></div>"+
+      "<div class='meta'>"+esc(r.at)+(r.who?" · "+esc(r.who):"")+(r.by?" · 처리 "+esc(r.by):"")+"</div>"+
+      "<pre>"+esc(r.text)+"</pre>"+act+"</div>";
+  }).join("");
+}
+$("#list").addEventListener("click", async function(e){
+  var b=e.target.closest("button[data-id]"); if(!b) return;
+  b.disabled=true; b.textContent="처리 중";
+  try{ await fetch(API+"?action=set&pin="+encodeURIComponent(PIN)+"&id="+encodeURIComponent(b.dataset.id)+"&state="+b.dataset.s+"&by="+encodeURIComponent(WHO)); }catch(err){}
+  load();
+});
+async function load(){
+  try{
+    var r = await fetch(API+"?action=list&pin="+encodeURIComponent(PIN)+"&t="+Date.now()).then(function(x){return x.json()});
+    if(!r.ok){ alert("비밀번호가 맞지 않습니다"); $("#main").hidden=true; $("#gate").hidden=false; return }
+    rows=r.rows||[]; draw();
+    var d=new Date(); $("#upd").textContent="마지막 확인 "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+  }catch(e){ $("#upd").textContent="연결 실패" }
+}
+$("#enter").onclick=function(){ PIN=$("#pin").value.trim(); if(!PIN) return; localStorage.setItem("appr.pin",PIN); $("#gate").hidden=true; $("#main").hidden=false; paintWho(); load(); setInterval(load,15000); };
+$("#pin").addEventListener("keydown",function(e){ if(e.key==="Enter") $("#enter").click() });
+$("#ref").onclick=load;
+var sv=localStorage.getItem("appr.pin"); if(sv){ $("#pin").value=sv; }
+</script>
+</body>
+</html>
