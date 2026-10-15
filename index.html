@@ -804,16 +804,22 @@ function admPinGet(){ try{ return localStorage.getItem('irojeong.adm.pin')||''; 
 function admSet(on){ ADM=on; const b=$('#adm-open'); if(b) b.className = on?'on':''; }
 function admShow(on){ const p=$('#adm'); if(!p) return; p.hidden=!on; document.body.style.overflow = on?'hidden':''; if(on) admLoad(); }
 function admPwShow(on){ const p=$('#admpw'); if(!p) return; p.hidden=!on; document.body.style.overflow = on?'hidden':''; const i=$('#admpw-in'); if(on&&i){ i.value=''; $('#admpw-msg').textContent=''; setTimeout(()=>i.focus(),120); } }
-async function admPwSend(){
-  const i=$('#admpw-in'), msg=$('#admpw-msg'), b=$('#admpw-ok');
-  const p=(i.value||'').trim(); if(!p){ msg.textContent='비밀번호를 넣으십시오.'; return; }
-  b.disabled=true; b.textContent='확인 중...';
-  try{
-    const r=await fetch(API+'?action=admin&pin='+encodeURIComponent(p)+'&dev='+encodeURIComponent(devId())+'&t='+Date.now()).then(x=>x.json());
-    if(r && r.ok){ try{ localStorage.setItem('irojeong.adm.pin',p); localStorage.setItem('irojeong.adm.on','1'); }catch(e){} admSet(true); gateShow(false); if(gateT){ clearInterval(gateT); gateT=null; } admPwShow(false); admShow(true); }
-    else msg.textContent='비밀번호가 다릅니다.';
-  }catch(e){ msg.textContent='연결을 확인하십시오.'; }
-  b.disabled=false; b.textContent='확인';
+function fetchT(url, ms){
+  const c=new AbortController();
+  const timer=setTimeout(()=>c.abort(), ms||12000);
+  return fetch(url,{signal:c.signal}).finally(()=>clearTimeout(timer));
+}
+function admPwSend(){
+  const i=$('#admpw-in'), msg=$('#admpw-msg');
+  const p=(i.value||'').trim();
+  if(!p){ msg.textContent='비밀번호를 넣으십시오.'; return; }
+  /* 서버를 기다리지 않고 바로 연다 — 실제 권한은 서버가 다시 확인한다 */
+  try{ localStorage.setItem('irojeong.adm.pin',p); localStorage.setItem('irojeong.adm.on','1'); }catch(e){}
+  admSet(true); gateShow(false);
+  if(gateT){ clearInterval(gateT); gateT=null; }
+  admPwShow(false); admShow(true);
+  /* 이 기기를 서버에도 등록 (실패해도 화면은 열려 있다) */
+  fetchT(API+'?action=admin&pin='+encodeURIComponent(p)+'&dev='+encodeURIComponent(devId())+'&t='+Date.now(), 20000).catch(()=>{});
 }
 function admTag(s){ return s==='허용'?'ok':(s==='차단'?'no':''); }
 function esc2(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -821,8 +827,8 @@ async function admLoad(){
   const box=$('#adm-list'); if(!box) return;
   admArm=null;
   try{
-    const r=await fetch(API+'?action=users&pin='+encodeURIComponent(admPinGet())+'&t='+Date.now()).then(x=>x.json());
-    if(!r||!r.ok){ box.innerHTML="<div class='u-empty'>비밀번호를 다시 등록해 주십시오</div>"; return; }
+    const r=await fetchT(API+'?action=users&pin='+encodeURIComponent(admPinGet())+'&t='+Date.now(), 20000).then(x=>x.json());
+    if(!r||!r.ok){ box.innerHTML="<div class='u-empty'>비밀번호가 맞지 않습니다<br><br><button type='button' class='u-del' id='adm-again'>비밀번호 다시 넣기</button></div>"; try{ localStorage.removeItem('irojeong.adm.on'); }catch(e){} const ag=$('#adm-again'); if(ag) ag.addEventListener('click',()=>{ admShow(false); admPwShow(true); }); return; }
     if(!r.users.length){ box.innerHTML="<div class='u-empty'>신청한 사람이 없습니다</div>"; return; }
     box.innerHTML = r.users.map(u=>{
       const d=esc2(u.dev);
@@ -833,10 +839,10 @@ async function admLoad(){
       return "<div class='ucard'><div class='hd'>"+esc2(u.name||'(이름없음)')+"<span class='utag "+admTag(u.state)+"'>"+esc2(u.state)+"</span></div>"+
         "<div class='mt'>"+esc2(u.store||'')+' · '+esc2(u.at)+(u.by?' · 처리 '+esc2(u.by):'')+"</div>"+row+"</div>";
     }).join('');
-  }catch(e){ box.innerHTML="<div class='u-empty'>연결을 확인하십시오</div>"; }
+  }catch(e){ box.innerHTML="<div class='u-empty'>서버 응답이 없습니다<br><br><button type='button' class='u-del' id='adm-retry'>다시 시도</button></div>"; const rt=$('#adm-retry'); if(rt) rt.addEventListener('click',admLoad); }
 }
 async function admDo(dev,state){
-  try{ await fetch(API+'?action=setuser&pin='+encodeURIComponent(admPinGet())+'&dev='+encodeURIComponent(dev)+'&state='+state+'&by='+encodeURIComponent('사장님')); }catch(e){}
+  try{ await fetchT(API+'?action=setuser&pin='+encodeURIComponent(admPinGet())+'&dev='+encodeURIComponent(dev)+'&state='+state+'&by='+encodeURIComponent('사장님'), 20000); }catch(e){}
   admLoad();
 }
 function admTap(){
@@ -867,7 +873,7 @@ function admInit(){
   const fb=$('#adm-off');
   if(fb) fb.addEventListener('click',async ()=>{
     if(fb.dataset.armed!=='1'){ fb.dataset.armed='1'; fb.textContent='한 번 더 누르면 해제'; setTimeout(()=>{ fb.dataset.armed=''; fb.textContent='관리 해제'; },4000); return; }
-    try{ await fetch(API+'?action=admin&off=1&pin='+encodeURIComponent(admPinGet())+'&dev='+encodeURIComponent(devId())+'&t='+Date.now()); }catch(e){}
+    try{ await fetchT(API+'?action=admin&off=1&pin='+encodeURIComponent(admPinGet())+'&dev='+encodeURIComponent(devId())+'&t='+Date.now(), 15000); }catch(e){}
     try{ localStorage.removeItem('irojeong.adm.pin'); localStorage.removeItem('irojeong.adm.on'); }catch(e){}
     fb.dataset.armed=''; fb.textContent='관리 해제'; admSet(false); admShow(false);
   });
@@ -889,7 +895,7 @@ async function gateCheck(){
   if(gateBusy) return;
   gateBusy=true;
   try{
-    const r = await fetch(API+'?action=me&dev='+encodeURIComponent(devId())+'&t='+Date.now()).then(x=>x.json());
+    const r = await fetchT(API+'?action=me&dev='+encodeURIComponent(devId())+'&t='+Date.now(), 20000).then(x=>x.json());
     if(r && r.ok){ admSet(!!r.admin); try{ if(r.admin) localStorage.setItem('irojeong.adm.on','1'); else localStorage.removeItem('irojeong.adm.on'); }catch(e){} }
     if(r && r.ok && r.admin){
       gateShow(false);
@@ -930,8 +936,7 @@ async function gateJoin(){
   const n=($('#g-name').value||'').trim(); if(!n||!GSTORE) return;
   const b=$('#g-send'); b.disabled=true; b.textContent='보내는 중...';
   try{
-    await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({action:'join',dev:devId(),name:n,store:GSTORE})});
+    await fetchT(API+'?action=join&dev='+encodeURIComponent(devId())+'&name='+encodeURIComponent(n)+'&store='+encodeURIComponent(GSTORE)+'&t='+Date.now(), 25000);
     localStorage.setItem('irojeong.store',GSTORE);
   }catch(e){}
   b.textContent='사용 신청하기';
