@@ -340,7 +340,7 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
       </div>
       <div class="acts">
         <a class="primary" id="s-sms" href="#">문자로 보내기</a>
-        <button type="button" class="primary" id="s-copy">문구 복사</button>
+        <a class="primary" id="s-kakao" href="#" hidden>문구 복사 후 카톡 열기</a><button type="button" class="primary" id="s-copy">문구 복사</button>
         <button type="button" class="done" id="s-done" hidden>발주 완료 · 목록 비우기</button>
       </div>
       <div class="toast" id="s-toast" role="status"></div>
@@ -435,6 +435,7 @@ const DEST={"뻥튀기":['구미','현풍','밀양'],"밀양탁주":['구미','�
             "한일수산":['구미','현풍','밀양'],
             "물류":['구미','현풍','밀양'],
             "신우유통":['현풍']};
+const KAKAO={"물류":"kakaotalk://"};
 function telFmt(t){return t.length===11?t.slice(0,3)+'-'+t.slice(3,7)+'-'+t.slice(7):t}
 const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
 function smsUrl(t,body){
@@ -775,6 +776,7 @@ function drawSlip(){
     a.hidden=!ok;
     if(ok) a.href=smsUrl(c.t, keep ? sent.t : slipText(v));
     $('#s-copy').className = phone?'second':(ok?'second':'primary'); }
+  { const ka=$('#s-kakao'), kk=KAKAO[v], lock2=!!ds&&!S.dest[v]; const okk=!!kk&&!phone&&!lock2; ka.hidden=!okk; if(okk) $('#s-copy').className='second'; else $('#s-copy').className='primary'; }
   $('#s-copy').textContent = keep ? '다시 복사' : '문구 복사';
 }
 function toast(m){const t=$('#s-toast');t.textContent=m;clearTimeout(t._t);
@@ -877,6 +879,16 @@ $('#make').addEventListener('click',()=>{
   if(!$('#s-date').value)$('#s-date').value=new Date().toLocaleDateString('sv-SE');
   $('#s-who').value=S.who;
   drawSlip();$('#sheet').hidden=false;document.body.style.overflow='hidden';
+});
+$('#s-kakao').addEventListener('click',e=>{
+  e.preventDefault();
+  const v=S.vendor, t=slipText(v);
+  try{navigator.clipboard.writeText(t);}catch(err){}
+  sent={v:v,t:t};
+  picked(v).forEach(r=>setQty(v,r[0],0));
+  if(S.on&&!picked(v).length)S.on=false;
+  save(); render();
+  location.href=KAKAO[v]||'kakaotalk://';
 });
 $('#s-close').addEventListener('click',()=>{$('#sheet').hidden=true;document.body.style.overflow=''});
 $('#s-date').addEventListener('change',drawSlip);
