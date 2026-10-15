@@ -271,7 +271,30 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
 .gst button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .gsend{width:100%;padding:15px;border:0;border-radius:12px;background:var(--brand);color:#fff;font-weight:800;font-size:16px}
 .gsend:disabled{opacity:.45}
+
+#adm-open{display:none;margin-left:auto;padding:7px 13px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--sub);font:700 13px/1 inherit}
+#adm-open.on{display:block}
+#adm{position:fixed;inset:0;z-index:960;background:var(--bg);overflow:auto;padding:20px 16px 40px}
+.adm-bar{display:flex;align-items:center;justify-content:space-between;max-width:520px;margin:0 auto 16px}
+.adm-bar h2{font-size:19px;margin:0}
+.adm-bar button{padding:9px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--sub);font:700 14px/1 inherit}
+#adm-list{max-width:520px;margin:0 auto}
+.ucard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:11px}
+.ucard .hd{display:flex;align-items:center;gap:8px;font-weight:800}
+.utag{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:#EFE7D6;color:#7A6B52}
+.utag.ok{background:#DFEDE4;color:#1F7A4D}.utag.no{background:#F3E0DF;color:var(--brand)}
+.ucard .mt{color:var(--sub);font-size:12px;margin:5px 0 10px}
+.urow{display:flex;gap:8px}
+.urow button{flex:1;padding:11px 0;border:0;border-radius:10px;font:800 14px/1 inherit}
+.u-yes{background:#1F7A4D;color:#fff}.u-no{background:#F3E0DF;color:var(--brand)}
+.u-del{background:var(--surface);border:1px solid var(--line);color:var(--sub)}
+.u-empty{color:var(--sub);text-align:center;padding:44px 0}
 </style>
+
+<div id="adm" hidden>
+  <div class="adm-bar"><h2>사용자 허가</h2><div><button type="button" id="adm-ref">새로고침</button> <button type="button" id="adm-close">닫기</button></div></div>
+  <div id="adm-list"><div class="u-empty">불러오는 중…</div></div>
+</div>
 
 <div id="gate" hidden><div class="gbox"><span class="seal">理老亭</span><h2 id="g-title">사용 신청</h2><p id="g-msg">이름을 적고 매장을 고른 뒤 신청하십시오.</p><div id="g-form"><input id="g-name" type="text" placeholder="이름" autocomplete="off"><div class="gst"><button type="button" data-s="구미">구미</button><button type="button" data-s="현풍">현풍</button><button type="button" data-s="밀양">밀양</button></div><button type="button" class="gsend" id="g-send">사용 신청하기</button></div></div></div>
 
@@ -282,6 +305,7 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
       <span class="mj">이로정</span>
       <h1>발주</h1>
       <span class="sub" id="today"></span>
+      <button type="button" id="adm-open">관리</button>
     </div>
     <div class="vendors" role="tablist" aria-label="거래처">
       <button type="button" role="tab" data-v="택배" aria-selected="true"><span>택배</span><span class="tally">0</span></button>
@@ -757,9 +781,62 @@ let GSTORE=localStorage.getItem('irojeong.store')||'', gateT=null;
 function gstPaint(){ document.querySelectorAll('.gst button').forEach(function(b){ b.className = b.dataset.s===GSTORE?'on':''; }); gsendOK(); }
 function gsendOK(){ const n=($('#g-name').value||'').trim(); $('#g-send').disabled = !(n && GSTORE); }
 function gateShow(on){ $('#gate').hidden=!on; document.body.style.overflow = on?'hidden':''; }
+/* ===== 관리(사장 전용) ===== */
+let ADM=false, admHold=null;
+function admSet(on){ ADM=on; const b=$('#adm-open'); if(b) b.className = on?'on':''; }
+function admShow(on){ $('#adm').hidden=!on; document.body.style.overflow = on?'hidden':''; if(on) admLoad(); }
+function ADMPIN(){ let p=localStorage.getItem('irojeong.adm.pin'); if(!p){ p=prompt('관리 비밀번호')||''; if(p) localStorage.setItem('irojeong.adm.pin',p); } return p; }
+function admPin(){
+  const p=prompt('관리 비밀번호');
+  if(p===null||p==='') return;
+  fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'admin',pin:p,dev:devId()})})
+    .then(x=>x.json()).then(r=>{ if(r&&r.ok){ localStorage.setItem('irojeong.adm.pin',p); admSet(true); alert('이 기기를 관리자로 기억했습니다.'); } else alert('비밀번호가 다릅니다.'); })
+    .catch(()=>alert('연결을 확인하십시오.'));
+}
+function admTag(s){ return s==='허용'?'ok':(s==='차단'?'no':''); }
+function esc2(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+async function admLoad(){
+  const box=$('#adm-list');
+  try{
+    const r=await fetch(API+'?action=users&pin='+encodeURIComponent(ADMPIN())+'&t='+Date.now()).then(x=>x.json());
+    if(!r||!r.ok){ box.innerHTML="<div class='u-empty'>비밀번호가 다릅니다</div>"; localStorage.removeItem('irojeong.adm.pin'); return; }
+    if(!r.users.length){ box.innerHTML="<div class='u-empty'>신청한 사람이 없습니다</div>"; return; }
+    box.innerHTML = r.users.map(u=>{
+      const d=esc2(u.dev);
+      const del = "<button class='u-del' data-dev='"+d+"' data-s='delete'>삭제</button>";
+      const row = u.state==='허용'
+        ? "<div class='urow'><button class='u-no' data-dev='"+d+"' data-s='block'>차단하기</button>"+del+"</div>"
+        : "<div class='urow'><button class='u-yes' data-dev='"+d+"' data-s='allow'>허가</button><button class='u-no' data-dev='"+d+"' data-s='block'>차단</button>"+del+"</div>";
+      return "<div class='ucard'><div class='hd'>"+esc2(u.name||'(이름없음)')+"<span class='utag "+admTag(u.state)+"'>"+esc2(u.state)+"</span></div>"+
+        "<div class='mt'>"+esc2(u.store||'')+' · '+esc2(u.at)+(u.by?' · 처리 '+esc2(u.by):'')+"</div>"+row+"</div>";
+    }).join('');
+  }catch(e){ box.innerHTML="<div class='u-empty'>연결을 확인하십시오</div>"; }
+}
+function admInit(){
+  const seal=document.querySelector('.top .seal');
+  if(seal){
+    const start=()=>{ admHold=setTimeout(admPin,1200); };
+    const stop=()=>{ clearTimeout(admHold); };
+    seal.addEventListener('touchstart',start,{passive:true}); seal.addEventListener('touchend',stop);
+    seal.addEventListener('touchmove',stop,{passive:true}); seal.addEventListener('mousedown',start); seal.addEventListener('mouseup',stop); seal.addEventListener('mouseleave',stop);
+  }
+  const ob=$('#adm-open'); if(ob) ob.addEventListener('click',()=>admShow(true));
+  const cb=$('#adm-close'); if(cb) cb.addEventListener('click',()=>admShow(false));
+  const rb=$('#adm-ref'); if(rb) rb.addEventListener('click',admLoad);
+  const al=$('#adm-list');
+  if(al) al.addEventListener('click',async e=>{
+    const b=e.target.closest('button[data-dev]'); if(!b) return;
+    if(b.dataset.s==='delete' && !confirm('목록에서 완전히 지울까요?\n지우면 그 사람이 다시 신청할 수 있습니다.')) return;
+    b.disabled=true; b.textContent='처리 중';
+    try{ await fetch(API+'?action=setuser&pin='+encodeURIComponent(ADMPIN())+'&dev='+encodeURIComponent(b.dataset.dev)+'&state='+b.dataset.s+'&by='+encodeURIComponent('사장님')); }catch(err){}
+    admLoad();
+  });
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',admInit); else admInit();
 async function gateCheck(){
   try{
     const r = await fetch(API+'?action=me&dev='+encodeURIComponent(devId())+'&t='+Date.now()).then(x=>x.json());
+    if(r && r.ok){ admSet(!!r.admin); }
     if(r && r.ok && r.state==='허용'){
       gateShow(false);
       if(r.name && !S.who){ S.who=r.name; const w=$('#s-who'); if(w) w.value=r.name; save(); }
