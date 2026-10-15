@@ -257,44 +257,30 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
 .legend em{font-style:normal;width:16px;height:16px;border-radius:6px;flex:none}
 
 #splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(120% 80% at 50% 38%, #A33C26 0%, #7A2818 55%, #5A1B0F 100%);
+  background:var(--bg);
   padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
   transition:opacity .42s ease}
 #splash.out{opacity:0;pointer-events:none}
 #splash .sign{display:flex;flex-direction:column;align-items:center;
   opacity:0;transform:translateY(10px);animation:sgin .62s cubic-bezier(.22,.8,.3,1) .12s forwards}
-#splash .ln{display:block;width:126px;height:1px;background:linear-gradient(90deg,
-  rgba(201,162,74,0) 0%, #C9A24A 26%, #EBD29A 50%, #C9A24A 74%, rgba(201,162,74,0) 100%)}
-#splash .wm{font-family:var(--serif);font-weight:800;font-size:44px;color:#F8EADA;
-  letter-spacing:10px;text-indent:10px;line-height:1;margin:22px 0 20px;
-  text-shadow:0 2px 14px rgba(40,10,4,.45)}
-#splash .sb{font-size:12px;font-weight:600;color:#D9A98C;letter-spacing:11px;text-indent:11px;
-  line-height:1;margin-top:17px}
+#splash .sl{display:inline-flex;align-items:center;justify-content:center;
+  writing-mode:vertical-rl;text-orientation:upright;
+  background:var(--brand);color:#FBF1EC;font-family:var(--serif);font-weight:800;
+  font-size:21px;letter-spacing:3px;line-height:1;width:42px;height:84px;border-radius:8px}
+#splash .wm{font-family:var(--serif);font-weight:800;font-size:42px;color:var(--ink);
+  letter-spacing:10px;text-indent:10px;line-height:1;margin:26px 0 0}
+#splash .sb{font-size:12px;font-weight:700;color:var(--brand);letter-spacing:9px;text-indent:9px;
+  line-height:1;margin-top:16px}
 @keyframes sgin{to{opacity:1;transform:translateY(0)}}
 @media (prefers-reduced-motion:reduce){#splash{transition:none}
   #splash .sign{animation:none;opacity:1;transform:none}*{transition:none!important}}
-
-/* 여는 화면 */
-#boot{position:fixed;inset:0;z-index:900;background:var(--bg);display:flex;
-  align-items:center;justify-content:center;
-  animation:bootOut .45s ease .85s forwards}
-#boot .mark{display:flex;flex-direction:column;align-items:center;gap:14px;
-  animation:bootIn .5s cubic-bezier(.2,.8,.3,1) both}
-#boot .seal{width:38px;height:76px;font-size:19px;letter-spacing:3px;border-radius:7px}
-#boot .nm{font-family:var(--serif);font-weight:800;font-size:38px;color:var(--ink);
-  letter-spacing:6px;text-indent:6px;line-height:1}
-#boot .en{font-size:12px;font-weight:700;color:var(--brand);letter-spacing:7px;text-indent:7px}
-@keyframes bootIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@keyframes bootOut{to{opacity:0;visibility:hidden}}
-@media (prefers-reduced-motion:reduce){#boot .mark{animation:none}}
 </style>
 
 <div id="splash" aria-hidden="true">
   <div class="sign">
-    <span class="ln"></span>
+    <span class="sl">理老亭</span>
     <div class="wm">이로정</div>
-    <span class="ln"></span>
-    <div class="sb">발주</div>
+    <div class="sb">ORDER</div>
   </div>
 </div>
 
@@ -950,7 +936,7 @@ render();
   if(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches){
     setTimeout(()=>sp.remove(),600); return;
   }
-  setTimeout(go,1500);
+  setTimeout(go,1100);
   sp.addEventListener('click',go);
 })();
 
