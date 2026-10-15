@@ -1,4 +1,4 @@
-const C='irojeong-order-v2';
+const C='irojeong-order-v3';
 self.addEventListener('install',e=>{self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil((async()=>{
   const ks=await caches.keys();
