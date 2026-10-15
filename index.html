@@ -292,7 +292,7 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
 </style>
 
 <div id="adm" hidden>
-  <div class="adm-bar"><h2>사용자 허가</h2><div><button type="button" id="adm-ref">새로고침</button> <button type="button" id="adm-close">닫기</button></div></div>
+  <div class="adm-bar"><h2>사용자 허가</h2><div><button type="button" id="adm-off">관리 해제</button> <button type="button" id="adm-ref">새로고침</button> <button type="button" id="adm-close">닫기</button></div></div>
   <div id="adm-list"><div class="u-empty">불러오는 중…</div></div>
 </div>
 
@@ -823,6 +823,12 @@ function admInit(){
   const ob=$('#adm-open'); if(ob) ob.addEventListener('click',()=>admShow(true));
   const cb=$('#adm-close'); if(cb) cb.addEventListener('click',()=>admShow(false));
   const rb=$('#adm-ref'); if(rb) rb.addEventListener('click',admLoad);
+  const fb=$('#adm-off');
+  if(fb) fb.addEventListener('click',async ()=>{
+    if(!confirm('이 기기에서 관리 기능을 없앨까요?\n나중에 도장을 길게 눌러 다시 등록할 수 있습니다.')) return;
+    try{ await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'admin',pin:ADMPIN(),dev:devId(),off:'1'})}); }catch(e){}
+    localStorage.removeItem('irojeong.adm.pin'); admSet(false); admShow(false);
+  });
   const al=$('#adm-list');
   if(al) al.addEventListener('click',async e=>{
     const b=e.target.closest('button[data-dev]'); if(!b) return;
