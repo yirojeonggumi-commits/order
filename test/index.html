@@ -269,6 +269,9 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
 .appr.ok{background:var(--okbg);color:var(--ok)}
 .appr.no{background:var(--redbg);color:var(--red)}
 #s-ask{background:#3E6B63;color:#fff}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+.pulse{animation:pulse 1.25s ease-in-out 3}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
 </style>
 
 <div class="top">
@@ -759,12 +762,13 @@ function poll(v){
   pollT=setTimeout(async function(){
     try{
       const r=await fetch(API+'?action=status&id='+encodeURIComponent(q.id)+'&t='+Date.now()).then(x=>x.json());
-      if(r&&r.ok&&r.state&&r.state!==q.state){ q.state=r.state; q.by=r.by||''; saveReq(); drawSlip(); }
+      if(r&&r.ok&&r.state&&r.state!==q.state){ q.state=r.state; q.by=r.by||''; saveReq(); drawSlip(); if(r.state==='승인') notifyOK(v,q.by); }
     }catch(e){}
     poll(v);
   },5000);
 }
 async function askApproval(){
+  askNoti();
   const v=S.vendor, t=slipText(v);
   const ask=$('#s-ask'); ask.textContent='보내는 중...';
   try{
@@ -773,6 +777,19 @@ async function askApproval(){
     if(r&&r.ok){ REQ[v]={id:r.id,state:'대기',text:t,by:''}; saveReq(); drawSlip(); poll(v); toast('승인 요청을 보냈습니다'); }
     else { toast('요청 실패'); drawSlip(); }
   }catch(e){ toast('인터넷을 확인하십시오'); drawSlip(); }
+}
+function notifyOK(v,by){
+  try{ if(navigator.vibrate) navigator.vibrate([200,90,200]); }catch(e){}
+  try{
+    if(window.Notification && Notification.permission==='granted'){
+      var n=new Notification('승인되었습니다 — '+v, {body:(by?by+' · ':'')+'이제 발주를 보낼 수 있습니다', tag:'appr-'+v});
+      n.onclick=function(){ try{window.focus()}catch(e){} n.close(); };
+    }
+  }catch(e){}
+  try{ navigator.clipboard.writeText(slipText(v)); }catch(e){}
+}
+function askNoti(){
+  try{ if(window.Notification && Notification.permission==='default') Notification.requestPermission(); }catch(e){}
 }
 function drawSlip(){
   const v=S.vendor;
@@ -827,6 +844,7 @@ function drawSlip(){
     ask.hidden = okA;
     ask.textContent = (q && q.state==='대기') ? '다시 요청' : '승인 요청';
     if(!okA){ $('#s-sms').hidden=true; $('#s-kakao').hidden=true; $('#s-copy').disabled=true; }
+    else { const go = !$('#s-kakao').hidden ? $('#s-kakao') : (!$('#s-sms').hidden ? $('#s-sms') : $('#s-copy')); if(go) go.classList.add('pulse'); }
     if(q && q.state==='대기') poll(v);
   }
 }
