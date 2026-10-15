@@ -428,7 +428,7 @@ const DATA={
 
 const VEND=['택배','물류','도투향','한일수산','사모님','뻥튀기','밀양탁주','고급강정','신우유통'];
 const RENAME=[['장수','물류'],['남해','뻥튀기']];
-const PHONE=['사모님'];
+const PHONE=[];
 const CONTACT={"도투향":{n:"조덕예",t:"01094387890"},
                "한일수산":{n:"황영석",t:"01055026542"},
                "사모님":{n:"사모님",t:"01049390875"},
@@ -453,8 +453,7 @@ function contactHtml(v){
   return '<div class="contact">'+
     '<span class="who">'+esc(c.n)+'</span><span class="tel">'+telFmt(c.t)+'</span>'+
     '<span class="cc">'+
-      (ph?'':'<a class="act" href="'+smsUrl(c.t,'')+'">문자</a>')+
-      '<a class="act call" href="tel:'+c.t+'">전화</a>'+
+      '<a class="act" href="'+smsUrl(c.t,'')+'">문자</a>'+
       '<button type="button" class="act cp" data-tel="'+c.t+'">복사</button>'+
     '</span></div>';
 }
