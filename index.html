@@ -508,10 +508,20 @@ function parcelLike(v){
   if(v==='택배') return r;
   return {warn:r.warn, html:'<b>택배로 들어옵니다</b> · 택배와 같은 기준입니다 — '+r.html};
 }
+const WEEKWED=['택배','뻥튀기','밀양탁주','고급강정','신우유통'];
+function wedHtml(){
+  const t=today0(), diff=(3-t.getDay()+7)%7, w=addD(t,diff);
+  const when = diff===0 ? '<b>오늘이 수요일입니다</b>'
+    : '이번 주 수요일 <b>'+ymd(w)+'</b> · D-'+diff;
+  return {warn:diff<=1, html:'매주 <b>수요일 전까지</b> 발주를 넣으셔야 합니다 · '+when};
+}
 function ruleHtml(v){
-  if(v==='택배'||v==='뻥튀기') return parcelLike(v);
-  if(v==='물류') return {warn:false,html:'일·월·화·수·목·금 발주 → <b>다음날 배송</b>  (토요일 발주 제외)'};
-  return null;
+  let base=null;
+  if(v==='택배'||v==='뻥튀기') base=parcelLike(v);
+  else if(v==='물류') base={warn:false,html:'일·월·화·수·목·금 발주 → <b>다음날 배송</b>  (토요일 발주 제외)'};
+  const wk = WEEKWED.indexOf(v)>=0 ? wedHtml() : null;
+  if(base&&wk) return {warn:base.warn||wk.warn, html:base.html+'<br>'+wk.html};
+  return wk||base;
 }
 function deliv(v,ds){
   const d=new Date(ds+'T00:00:00');
