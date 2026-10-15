@@ -776,7 +776,7 @@ function drawSlip(){
     a.hidden=!ok;
     if(ok) a.href=smsUrl(c.t, keep ? sent.t : slipText(v));
     $('#s-copy').className = phone?'second':(ok?'second':'primary'); }
-  { const ka=$('#s-kakao'), kk=KAKAO[v], lock2=!!ds&&!S.dest[v]; const okk=!!kk&&!phone&&!lock2; ka.hidden=!okk; if(okk) ka.href=kakaoHref(); if(okk) $('#s-copy').className='second'; else $('#s-copy').className='primary'; }
+  { const ka=$('#s-kakao'), kk=KAKAO[v], lock2=!!ds&&!S.dest[v]; const okk=!!kk&&!phone&&!lock2; ka.hidden=!okk; if(okk){ ka.href=kakaoHref(); ka.textContent = navigator.share ? '카톡으로 보내기' : '문구 복사 후 카톡 열기'; } if(okk) $('#s-copy').className='second'; else $('#s-copy').className='primary'; }
   $('#s-copy').textContent = keep ? '다시 복사' : '문구 복사';
 }
 function toast(m){const t=$('#s-toast');t.textContent=m;clearTimeout(t._t);
@@ -886,11 +886,12 @@ function copyNow(t){
   try{ const ta=document.createElement('textarea'); ta.value=t; ta.setAttribute('readonly',''); ta.style.cssText='position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,t.length); const ok=document.execCommand('copy'); document.body.removeChild(ta); return ok; }catch(e){}
   return false;
 }
-$('#s-kakao').addEventListener('click',()=>{
+$('#s-kakao').addEventListener('click',e=>{
   const v=S.vendor, t=slipText(v);
   copyNow(t);
   sent={v:v,t:t};
-  setTimeout(()=>{ picked(v).forEach(r=>setQty(v,r[0],0)); if(S.on&&!picked(v).length)S.on=false; save(); render(); },600);
+  if(navigator.share){ e.preventDefault(); try{ navigator.share({text:t}); }catch(err){} }
+  setTimeout(()=>{ picked(v).forEach(r=>setQty(v,r[0],0)); if(S.on&&!picked(v).length)S.on=false; save(); render(); },800);
 });
 $('#s-close').addEventListener('click',()=>{$('#sheet').hidden=true;document.body.style.overflow=''});
 $('#s-date').addEventListener('change',drawSlip);
