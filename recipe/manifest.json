@@ -1,0 +1,11 @@
+{
+ "name": "이로정 표준 레시피",
+ "short_name": "이로정 레시피",
+ "start_url": ".",
+ "scope": ".",
+ "display": "standalone",
+ "background_color": "#F4F1E9",
+ "theme_color": "#B2392C",
+ "lang": "ko",
+ "icons": []
+}

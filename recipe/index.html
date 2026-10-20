@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="이로정 레시피">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#B2392C">
+<title>이로정 표준 레시피</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#F4F1E9; --surface:#FDFBF6; --fill:#EBE5D8; --fill2:#F1ECE1;
+  --ink:#23201D; --sub:#685D50; --mute:#9A8E7E; --line:#DFD7C7; --line2:#EBE5D9;
+  --brand:#B2392C; --brand-dk:#8E2C21;
+  --ok:#1F6B4A; --okbg:#E3EFE7;
+  --red:#B3261E; --redbg:#FBEDEB; --gold:#D9A23C;
+  --sans:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+  --serif:'Nanum Myeongjo',serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#17120F; --surface:#1E1815; --fill:#2A221D; --fill2:#221B17;
+  --ink:#F2EAE2; --sub:#BCA998; --mute:#948374; --line:#33281F; --line2:#272019;
+  --brand:#E8927C; --brand-dk:#CE7762;
+  --ok:#5FBF8E; --okbg:#1B2B23;
+  --red:#FF8A80; --redbg:#2A1917; --gold:#E0B35E;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#17120F; --surface:#1E1815; --fill:#2A221D; --fill2:#221B17;
+  --ink:#F2EAE2; --sub:#BCA998; --mute:#948374; --line:#33281F; --line2:#272019;
+  --brand:#E8927C; --brand-dk:#CE7762;
+  --ok:#5FBF8E; --okbg:#1B2B23;
+  --red:#FF8A80; --redbg:#2A1917; --gold:#E0B35E;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--sans);
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.in{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:620px;margin:0 auto}
+.seal{display:inline-block;font-family:var(--serif);font-weight:800;color:#fff;background:var(--brand);
+  padding:5px 8px;border-radius:5px;font-size:13px;letter-spacing:.04em;line-height:1.2;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+
+/* 상단 */
+.top{position:sticky;top:0;z-index:40;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .in{display:flex;align-items:center;gap:9px;min-height:58px;padding-top:9px;padding-bottom:9px}
+.top h1{font-family:var(--serif);font-weight:700;font-size:17px;margin:0;flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbtn{padding:8px 13px;border:1px solid var(--line);border-radius:999px;background:var(--fill2);
+  color:var(--sub);font-weight:700;font-size:13px;white-space:nowrap}
+.tbtn.on{background:var(--brand);border-color:var(--brand);color:#fff}
+
+/* 배율 */
+.sc{position:sticky;top:58px;z-index:30;background:var(--fill2);border-bottom:1px solid var(--line)}
+.sc .in{padding-top:10px;padding-bottom:10px}
+.scr{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.lab{font-size:12px;font-weight:700;color:var(--mute);letter-spacing:.06em;width:100%;margin-bottom:2px}
+.mb{padding:10px 0;width:56px;border:1px solid var(--line);border-radius:10px;background:var(--surface);
+  color:var(--sub);font-weight:700;font-variant-numeric:tabular-nums}
+.mb.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.nin{width:88px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);
+  font-weight:700;font-variant-numeric:tabular-nums;text-align:center}
+.hint{width:100%;font-size:12.5px;color:var(--sub);margin-top:5px;font-variant-numeric:tabular-nums}
+
+/* 목록 */
+.pad{padding-top:18px;padding-bottom:46px}
+.sch{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:12px}
+.cats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.cat{padding:7px 13px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--sub);font-size:13px;font-weight:500}
+.cat.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.cnt{font-size:12.5px;color:var(--mute);margin:0 0 12px;font-variant-numeric:tabular-nums}
+.list{display:grid;gap:8px}
+.rc{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--surface);
+  border:1px solid var(--line);border-radius:13px;padding:14px 15px}
+.rc .n{font-family:var(--serif);font-weight:700;color:var(--brand);font-size:13px;width:21px;flex:none;font-variant-numeric:tabular-nums}
+.rc .m{flex:1;min-width:0}
+.rc b{display:block;font-size:16px;font-weight:700}
+.rc small{color:var(--sub);font-size:12.5px;font-variant-numeric:tabular-nums}
+.pill{flex:none;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--fill);color:var(--mute)}
+.pill.e{background:var(--redbg);color:var(--brand)}
+
+/* 상세 */
+h2.rt{font-family:var(--serif);font-weight:800;font-size:25px;margin:0;line-height:1.3}
+.rn{color:var(--sub);font-size:14px;margin:9px 0 0}
+h3{font-size:12px;font-weight:700;letter-spacing:.09em;color:var(--brand);margin:28px 0 9px;
+  padding-bottom:6px;border-bottom:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-size:11px;font-weight:500;color:var(--mute);padding:0 0 6px;text-align:right}
+th:first-child{text-align:left}
+td{padding:10px 0;border-top:1px solid var(--line2);vertical-align:baseline}
+td.b{text-align:right;color:var(--mute);font-size:12px;width:70px;white-space:nowrap}
+td.a{text-align:right;font-weight:700;font-size:17px;white-space:nowrap}
+td.u{text-align:right;color:var(--mute);font-size:12px;width:30px}
+tr.tot td{border-top:2px solid var(--ink);font-weight:700;padding-top:11px}
+ol.st{margin:0;padding:0;list-style:none;counter-reset:n}
+ol.st li{counter-increment:n;display:flex;gap:11px;padding:10px 0;border-top:1px solid var(--line2)}
+ol.st li:first-child{border-top:0}
+ol.st li::before{content:counter(n);font-family:var(--serif);font-weight:700;color:var(--brand);width:17px;flex:none}
+ul.cu{margin:0;padding:0;list-style:none;display:grid;gap:7px}
+ul.cu li{font-size:14px;background:var(--fill2);border-left:3px solid var(--gold);border-radius:0 9px 9px 0;padding:10px 12px}
+.tools{display:flex;gap:8px;margin-top:24px;flex-wrap:wrap}
+.bt{padding:12px 16px;border:1px solid var(--line);border-radius:11px;background:var(--surface);color:var(--ink);font-weight:500}
+.bt.p{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+.bt.d{color:var(--brand)}
+.bt:disabled{opacity:.45}
+.msg{font-size:13px;margin-top:11px}
+.msg.ok{color:var(--ok)}
+.msg.no{color:var(--brand)}
+.ro{font-size:13px;color:var(--sub);background:var(--fill2);border-radius:10px;padding:11px 13px;margin-top:16px}
+
+/* 편집 */
+.er{display:flex;gap:6px;margin-bottom:7px}
+.er input,.er textarea{flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.er input.q{flex:none;width:80px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.er input.un{flex:none;width:54px}
+.er textarea{min-height:60px;resize:vertical;line-height:1.5}
+.del{flex:none;width:40px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--mute);font-size:17px}
+.full{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:7px}
+
+/* 문 */
+#gate,#admpw{position:fixed;inset:0;z-index:950;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+.gbox{width:100%;max-width:340px;text-align:center}
+.gbox .seal{margin:0 auto 18px;font-size:15px;padding:7px 11px}
+.gbox h2{font-size:21px;margin:0 0 8px}
+.gbox p{color:var(--sub);font-size:14px;margin:0 0 20px;line-height:1.55}
+#g-name,#admpw-in{width:100%;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);text-align:center}
+.gst{display:flex;gap:8px;margin:10px 0}
+.gst button{flex:1;padding:13px 0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--sub);font-weight:700}
+.gst button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.gsend{width:100%;padding:15px;border:0;border-radius:12px;background:var(--brand);color:#fff;font-weight:800;font-size:16px;margin-top:10px}
+.gsend:disabled{opacity:.45}
+.pwc{width:100%;margin-top:9px;padding:12px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--sub)}
+.pwm{color:var(--brand);font-size:13px;min-height:19px;margin:9px 0 0}
+.load{text-align:center;color:var(--mute);padding:50px 0;font-size:14px}
+</style>
+</head>
+<body>
+
+<div id="gate" hidden><div class="gbox">
+  <span class="seal">理老亭</span>
+  <h2 id="g-title">사용 신청</h2>
+  <p id="g-msg">이름을 적고 매장을 고른 뒤 신청하십시오.</p>
+  <div id="g-form">
+    <input id="g-name" type="text" placeholder="이름" autocomplete="off">
+    <div class="gst">
+      <button type="button" data-s="구미">구미</button>
+      <button type="button" data-s="현풍">현풍</button>
+      <button type="button" data-s="밀양">밀양</button>
+    </div>
+    <button type="button" class="gsend" id="g-send">사용 신청하기</button>
+  </div>
+</div></div>
+
+<div id="admpw" hidden><div class="gbox">
+  <span class="seal">理老亭</span>
+  <h2>관리자 확인</h2>
+  <p>레시피를 고치려면 비밀번호를 넣으십시오.</p>
+  <input id="admpw-in" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호">
+  <p class="pwm" id="admpw-msg"></p>
+  <button type="button" class="gsend" id="admpw-ok">확인</button>
+  <button type="button" class="pwc" id="admpw-no">취소</button>
+</div></div>
+
+<div class="top"><div class="in">
+  <button type="button" class="tbtn" id="back" hidden>← 목록</button>
+  <span class="seal" id="seal">理老亭</span>
+  <h1 id="htit">표준 레시피</h1>
+  <button type="button" class="tbtn on" id="admbadge" hidden>관리자</button>
+</div></div>
+
+<div class="sc" id="scbar" hidden><div class="in">
+  <div class="scr">
+    <span class="lab">배율</span>
+    <button type="button" class="mb" data-m="0.5">0.5배</button>
+    <button type="button" class="mb" data-m="1">1배</button>
+    <button type="button" class="mb" data-m="2">2배</button>
+    <button type="button" class="mb" data-m="3">3배</button>
+    <input type="number" class="nin" id="mfree" step="0.01" min="0" inputmode="decimal" aria-label="배율">
+    <input type="number" class="nin" id="mtot" step="100" min="0" inputmode="numeric" placeholder="총량 g" aria-label="만들 총량">
+    <span class="hint" id="shint"></span>
+  </div>
+</div></div>
+
+<main class="in pad">
+  <section id="lv">
+    <input type="search" class="sch" id="q" placeholder="레시피 · 재료 이름으로 찾기" aria-label="검색">
+    <div class="cats" id="cats"></div>
+    <p class="cnt" id="cnt"></p>
+    <div class="list" id="list"></div>
+  </section>
+  <section id="dv" hidden></section>
+</main>
+
+<script>
+const API='https://script.google.com/macros/s/AKfycbwk90riQRjotfLfoK03mSa28OyUQ1twt67xzoS2xcMs0a9YWMa2-Mkgs7scV58qft7k/exec';
+const DK='irojeong.dev.id';
+const BUILTIN=[{"id":"02","sheet":"02_김치양념","title":"김치 양념","cat":"양념","note":"1배 기준. 밀가루 풀을 먼저 쑤어 식힌 뒤 나머지를 섞습니다.","ings":[{"name":"굵은 고춧가루","qty":6000,"unit":"g"},{"name":"청양 고춧가루","qty":1200,"unit":"g"},{"name":"물","qty":10000,"unit":"ml"},{"name":"밀가루","qty":500,"unit":"g"},{"name":"간생강","qty":250,"unit":"g"},{"name":"간마늘","qty":2000,"unit":"g"},{"name":"멸치액젓","qty":2400,"unit":"ml"},{"name":"멸치진젓","qty":3600,"unit":"ml"},{"name":"물엿","qty":2400,"unit":"ml"},{"name":"매실","qty":2400,"unit":"ml"},{"name":"미원","qty":300,"unit":"g"},{"name":"양파","qty":2100,"unit":"g"}],"steps":["김치 양념통에 굵은 고춧가루 6,000g과 청양 고춧가루 1,200g을 계량하여 넣는다.","솥에 물 10,000ml를 계량해 끓인다.","끓기 시작하면 밀가루 500g을 넣고 기포가 올라올 때까지 잘 저어 풀을 쑨다.","완성된 밀가루 풀을 김치 양념통에 붓는다.","간생강 250g, 간마늘 2,000g, 멸치액젓 2,400ml, 멸치진젓 3,600ml, 물엿 2,400ml, 매실 2,400ml, 미원 300g을 넣고 잘 젓는다.","양파 2,100g(7개)을 믹서기로 곱게 갈아 통에 붓고 함께 섞은 뒤 사용한다."],"cautions":["완성 후 농도에 따라 물엿을 추가할 수 있다.","양파 1개 = 300g 기준. 개수가 아니라 무게(2,100g)로 계량하는 것이 정확하다."]},{"id":"03","sheet":"03_무말랭이소스","title":"무말랭이 소스","cat":"소스","note":"전 재료 혼합형. 가루류를 먼저 계량한 뒤 액상을 넣습니다.","ings":[{"name":"굵은 고춧가루","qty":3900,"unit":"g"},{"name":"베트남 청양 고춧가루","qty":300,"unit":"g"},{"name":"설탕","qty":3000,"unit":"g"},{"name":"미원","qty":180,"unit":"g"},{"name":"맛소금","qty":500,"unit":"g"},{"name":"간마늘","qty":1500,"unit":"g"},{"name":"멸치액젓","qty":2500,"unit":"ml"},{"name":"물엿","qty":6000,"unit":"ml"},{"name":"매실 액기스","qty":1200,"unit":"ml"},{"name":"사과식초","qty":2900,"unit":"ml"}],"steps":["가루류(굵은 고춧가루·베트남 청양 고춧가루·설탕·미원·맛소금)를 먼저 계량한다.","액상류(간마늘·멸치액젓·물엿·매실 액기스·사과식초)를 계량해 넣는다.","전부 고르게 혼합하여 사용한다."],"cautions":["계량할 때 액상보다 가루를 먼저 계량해야 편하다."]},{"id":"04","sheet":"04_쌈장","title":"쌈장","cat":"양념","note":"전 재료 혼합형. 1배 총량 35,050g입니다.","ings":[{"name":"삼화콩된장","qty":14000,"unit":"g"},{"name":"집된장","qty":3000,"unit":"g"},{"name":"고추장","qty":3000,"unit":"g"},{"name":"물엿","qty":12000,"unit":"g"},{"name":"간마늘","qty":1000,"unit":"g"},{"name":"굵은 고춧가루","qty":500,"unit":"g"},{"name":"통깨","qty":150,"unit":"g"},{"name":"참기름","qty":200,"unit":"ml"},{"name":"사이다","qty":1200,"unit":"ml"}],"steps":["삼화콩된장 14,000g(1말), 집된장 3,000g, 고추장 3,000g을 통에 넣는다.","물엿 12,000g, 간마늘 1,000g, 굵은 고춧가루 500g, 통깨 150g, 참기름 200ml를 넣는다.","사이다 1,200ml를 넣고 전부 고르게 혼합하여 사용한다."],"cautions":["물엿통에 남은 잔액은 사이다로 헹궈서 다시 부어준다."]},{"id":"05","sheet":"05_전간장","title":"전간장","cat":"소스","note":"1:1:1:1 비율 레시피입니다. 아래 1배 기준은 1,000 단위로 임의 설정했으니 필요한 양에 맞춰 배율만 조정하십시오.","ings":[{"name":"식초","qty":1000,"unit":"ml"},{"name":"사이다","qty":1000,"unit":"ml"},{"name":"진간장","qty":1000,"unit":"ml"},{"name":"설탕","qty":1000,"unit":"g"}],"steps":["식초·사이다·진간장·설탕을 1:1:1:1 비율로 원하는 양만큼 계량한다.","전부 혼합하여 설탕이 완전히 녹을 때까지 저어 완성한다."],"cautions":["설탕을 잘 녹여서 사용한다."]},{"id":"06","sheet":"06_샐러드소스","title":"샐러드 소스","cat":"소스","note":"1배 기준. 바나나식초가 선행 재료입니다.","ings":[{"name":"통마늘","qty":300,"unit":"g"},{"name":"설탕","qty":300,"unit":"g"},{"name":"꽃소금","qty":30,"unit":"g"},{"name":"사이다","qty":700,"unit":"ml"},{"name":"바나나식초","qty":1400,"unit":"ml"},{"name":"마요네즈","qty":2000,"unit":"ml"}],"steps":["통마늘을 원하는 배수만큼 계량해 믹서기로 곱게 간다.","설탕과 꽃소금을 바나나식초에 넣어 녹인다.","사이다와 마요네즈를 포함해 전부 혼합하고 잘 저어 사용한다."],"cautions":["바나나식초에 바나나가 덜 갈려 있으면 통마늘을 갈 때 함께 갈아주면 좋다."]},{"id":"07","sheet":"07_바나나식초","title":"바나나 식초","cat":"선행재료","note":"1:1:1 비율. 냉장 2주 숙성이 필요한 선행 재료입니다.","ings":[{"name":"설탕","qty":15000,"unit":"g"},{"name":"양조식초","qty":15000,"unit":"ml"},{"name":"바나나(껍질 제거)","qty":15000,"unit":"g"},{"name":"레몬","qty":500,"unit":"g"}],"steps":["설탕 15,000g을 먼저 부어준다.","양조식초 15,000ml를 부어 설탕을 먼저 녹여 놓는다.","바나나 껍질을 제거한 15,000g을 슬라이스로 잘라 식초·설탕 혼합물에 넣는다.","레몬 500g(5개)의 씨앗을 제거해 바나나 밑으로 깊숙이 넣는다.","냉장에서 2주간 숙성시킨다.","2주 뒤 레몬은 폐기하고, 바나나만 건져 곱게 간 후 다시 혼합물과 합쳐 사용한다."],"cautions":["2주 숙성 기간 동안 3일에 한 번 내용물을 저어주는 것이 좋다.","샐러드소스의 재료이므로 재고를 미리 확보해 두어야 한다."]},{"id":"08","sheet":"08_돈가스소스","title":"돈가스 소스","cat":"소스","note":"가열 조리형. 1배 총량 6,400g입니다.","ings":[{"name":"버터","qty":50,"unit":"g"},{"name":"양파","qty":300,"unit":"g"},{"name":"진로 레드와인","qty":100,"unit":"ml"},{"name":"쉐프원 돈가스소스","qty":3600,"unit":"ml"},{"name":"물","qty":350,"unit":"ml"},{"name":"그래비 소스","qty":2000,"unit":"g"}],"steps":["양파 300g(1개)을 슬라이스해서 준비해 둔다.","솥에 버터 50g을 녹이면서 양파와 함께 볶는다.","양파가 노릇해지면 진로 레드와인 100ml를 넣는다.","쉐프원 돈가스소스 3,600ml(1.8L × 2통)를 넣는다.","물 350ml를 소스통에 반반 나눠 넣고 흔들어 잔액까지 투입한다.","그래비 소스 2,000g(1봉지)을 투입한다.","약불로 기포가 올라올 때까지 젓는다.","완성되면 바트에 옮긴 뒤 호일을 싸고 숨구멍을 내어 냉장 보관한다."],"cautions":["양송이는 기호에 따라 추가할 수 있다."]},{"id":"09","sheet":"09_온수육소스","title":"온수육 소스","cat":"소스","note":"희석형. 소스 : 물 = 1 : 2.8 비율입니다.","ings":[{"name":"수육소스","qty":3000,"unit":"g"},{"name":"물","qty":8400,"unit":"ml"}],"steps":["수육소스 3,000g(1봉지)을 계량한다.","물 8,400ml를 계량해 희석한다.","고르게 섞어 사용한다."],"cautions":["수육소스 봉지 안의 잔액은 계량한 물을 조금 넣어 흔들어 깨끗이 사용한다."]},{"id":"10","sheet":"10_염소탕양념","title":"염소탕 양념","cat":"양념","note":"1배 = 양념 원료 2,500g + 염소 육수 11,000g = 완성 13,500g.  한 솥 4,200g 기준 약 3.2솥.","ings":[{"name":"재래된장","qty":700,"unit":"g"},{"name":"들깨가루","qty":500,"unit":"g"},{"name":"굵은 고춧가루","qty":400,"unit":"g"},{"name":"다시다","qty":250,"unit":"g"},{"name":"꽃소금","qty":200,"unit":"g"},{"name":"간마늘","qty":200,"unit":"g"},{"name":"고추장","qty":100,"unit":"g"},{"name":"미원","qty":70,"unit":"g"},{"name":"간생강","qty":50,"unit":"g"},{"name":"후추","qty":30,"unit":"g"},{"name":"염소 육수","qty":11000,"unit":"g"}],"steps":["양념 재료 10종을 계량하여 혼합한다. (재래된장·들깨가루·굵은 고춧가루·다시다·꽃소금·간마늘·고추장·미원·간생강·후추 = 2,500g)","염소 육수 11,000g을 섞어 완성한다. (1배 완성량 13,500g)"],"cautions":["양념 원료만의 합은 2,500g이고, 육수를 섞은 완성 양념은 13,500g이다.","한 솥에 쓰는 염소탕 양념 4,200g은 육수를 섞은 완성 양념 기준이다. 따라서 1배(13,500g)로 약 3.2솥이 나온다.","솥 수에 맞춰 만들려면 위 '총량 g' 칸에 (솥 수 × 4,200)을 넣으면 된다. 3솥 12,600g(0.93배) · 4솥 16,800g(1.24배) · 5솥 21,000g(1.56배).","한 솥에 들어가는 내역은 양념 원료 약 778g + 염소 육수 약 3,422g이다.","원본 파일에 '수정해야함' 메모가 있었으나 육수 11kg으로 확정되었다."]},{"id":"11","sheet":"11_튀김혼합가루","title":"튀김 혼합가루","cat":"가루","note":"1배 = 1,791g. 900g씩 소분하여 보관합니다.","ings":[{"name":"큐원 튀김가루","qty":1240,"unit":"g"},{"name":"고성 감자전분","qty":400,"unit":"g"},{"name":"박력쌀가루","qty":130,"unit":"g"},{"name":"미원","qty":21,"unit":"g"}],"steps":["미원 21g, 박력쌀가루 130g, 감자전분 400g, 큐원 튀김가루 1,240g을 계량한다.","고르게 혼합한다.","900g씩 소분하여 보관한다. (1배 = 약 2봉지)"],"cautions":["매장별 필요량에 맞춰 ×2, ×3, ×4로 배수를 조정한다.","사용 시 소분 900g당 물 1,250ml를 섞는다."]},{"id":"12","sheet":"12_파전혼합가루","title":"파전 혼합가루 · 파전 반죽","cat":"가루","note":"1배 = 혼합가루 3,000g. 반죽 시 혼합가루 : 물 = 1 : 1.2입니다.","ings":[{"name":"백설 튀김가루","qty":2000,"unit":"g"},{"name":"백설 부침가루","qty":1000,"unit":"g"}],"steps":["백설 튀김가루 2,000g(2봉지)과 백설 부침가루 1,000g(1봉지)을 혼합 → 파전 혼합가루 3,000g 완성.","반죽 시 파전 혼합가루 1,000g에 물 1,200ml를 넣어 → 파전 반죽 완성.","혼합가루 3,000g 전량을 반죽할 경우 물 3,600ml가 필요하다."],"cautions":["혼합 비율은 튀김가루 : 부침가루 = 2 : 1 (각 1kg 봉지 기준).","반죽 비율은 혼합가루 1,000g : 물 1,200ml (1 : 1.2).","농도에 따라 물을 추가할 수 있다."]},{"id":"13","sheet":"13_잡채","title":"잡채","cat":"요리","note":"1회 조리 기준(당면 1,100g). 1배 총량 4,820g. 채소는 미리 손질해 볶아둔 것을 사용합니다.","ings":[{"name":"당면","qty":1100,"unit":"g"},{"name":"물엿","qty":900,"unit":"g"},{"name":"501간장","qty":400,"unit":"g"},{"name":"식용유","qty":130,"unit":"g"},{"name":"양파","qty":650,"unit":"g"},{"name":"당근","qty":600,"unit":"g"},{"name":"파프리카","qty":500,"unit":"g"},{"name":"양배추","qty":500,"unit":"g"},{"name":"참기름","qty":40,"unit":"ml"}],"steps":["솥에 물을 반 이상 받아 팔팔 끓인다.","당면 1,100g을 계량해 끓는 물에 넣고, 간택기 불을 1개로 줄여 9분간 삶는다.","삶는 동안 볶음 소스를 계량해 둔다. (식용유 130g, 501간장 400g, 물엿 900g)","다 삶기면 소쿠리에 받쳐 뜨거운 물을 뺀다.","솥으로 당면만 옮겨 찬물로 2~3회 헹군다.","소쿠리째 물을 털어내고, 볶는 솥에 계량해 둔 소스와 함께 넣어 강불로 졸인다. (바닥이 탈 수 있으므로 한 번씩 저어준다)","국물이 다 졸아갈 때쯤 준비해 둔 채소를 넣고 함께 볶는다. (양파 650g, 당근 600g, 파프리카 500g, 양배추 500g)","참기름 40ml(2바퀴)를 두른 후 마무리한다."],"cautions":["파프리카·양파·양배추·당근은 미리 손질하여 볶아둔 것을 사용한다.","채소 합계는 2,250g으로 당면(1,100g)의 약 2배입니다. 채소 비중이 높은 구성입니다."]},{"id":"14","sheet":"14_한우미역국","title":"한우 미역국","cat":"요리","note":"1배 기준, 총량 14,960g. 물 12,000ml를 10,000 + 2,000으로 나누어 사용합니다.","ings":[{"name":"물","qty":12000,"unit":"ml"},{"name":"미역","qty":300,"unit":"g"},{"name":"다시다","qty":300,"unit":"g"},{"name":"들깨기피","qty":300,"unit":"g"},{"name":"멸치액젓","qty":300,"unit":"ml"},{"name":"다진마늘","qty":200,"unit":"g"},{"name":"참기름","qty":180,"unit":"ml"},{"name":"미림","qty":150,"unit":"ml"},{"name":"집간장","qty":100,"unit":"ml"},{"name":"맛소금","qty":70,"unit":"g"},{"name":"후추","qty":10,"unit":"g"},{"name":"소고기(한우)","qty":1050,"unit":"g"}],"steps":["물 12,000ml를 계량해 둔다.","미역 300g을 물에 불린 뒤 한입 크기로 썬다.","솥에 참기름 180ml, 미림 150ml, 미역 300g을 넣고 중약불로 미역 비린내를 잡는다.","솥에 물 10,000ml를 넣는다.","멸치액젓 300ml, 집간장 100ml, 다진마늘 200g, 후추 10g, 맛소금 70g, 다시다 300g을 혼합해 둔다.","물이 끓기 시작하면 혼합한 양념을 넣는다.","소고기 1,050g을 넣는다.","간을 보고, 남은 물 2,000ml에 들깨기피 300g을 풀어서 넣는다."],"cautions":["1배 양 기준 레시피이며, 물 양은 간을 보고 조정 가능하다.","소고기 1,050g은 전체 14,960g의 7.0%지만, 물(12,000ml)을 제외한 실재료 2,960g 중에서는 35.5%를 차지한다.","한우 단가가 이 레시피의 원가를 사실상 결정하므로 매입 단가를 주기적으로 확인할 것."]},{"id":"15","sheet":"15_염소수육양념장","title":"염소수육 양념장","cat":"양념","note":"1배 기준, 총량 7,740g. 세 가지를 계량해 혼합하는 것만으로 완성됩니다.","ings":[{"name":"초장","qty":7000,"unit":"g"},{"name":"들깨","qty":700,"unit":"g"},{"name":"간생강","qty":40,"unit":"g"}],"steps":["초장 7,000g, 들깨 700g, 간생강 40g을 계량한다.","세 가지를 고르게 혼합하여 사용한다."],"cautions":["소스통에 덜어서 짜서 쓰면 편리하다.","초장이 전체의 90.4%를 차지하므로 초장 매입 단가가 이 양념장의 원가를 사실상 결정한다."]}];
+
+let OVER={}, ADM=false, cur=null, mult=1, editing=false, draft=null, catSel='전체';
+let GSTORE='', gateT=null, gateBusy=false, admTaps=0, admTapT=0, opened=false;
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>{ if(n==null||n==='')return ''; return (Math.round(Number(n)*10)/10).toLocaleString('ko-KR',{maximumFractionDigits:1}); };
+const get=id=>OVER[id]||BUILTIN.find(r=>r.id===id);
+const sum=r=>r.ings.reduce((s,i)=>s+(Number(i.qty)||0),0);
+const ed=id=>!!OVER[id];
+function ls(k,v){ try{ return v===undefined?localStorage.getItem(k):(v===null?localStorage.removeItem(k):localStorage.setItem(k,v)); }catch(e){ return null; } }
+function devId(){ let d=ls(DK); if(!d){ d='D'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); ls(DK,d);} return d; }
+function fetchT(url,ms,opt){ const c=new AbortController(); const t=setTimeout(()=>c.abort(),ms||15000);
+  return fetch(url,Object.assign({signal:c.signal},opt||{})).finally(()=>clearTimeout(t)); }
+
+/* ───── 문 ───── */
+function gateShow(on){ $('#gate').hidden=!on; document.body.style.overflow=on?'hidden':''; }
+function admSet(on){ ADM=on; $('#admbadge').hidden=!on; if(cur&&!editing) renderD(); }
+function admPwShow(on){ $('#admpw').hidden=!on; document.body.style.overflow=on?'hidden':'';
+  if(on){ $('#admpw-in').value=''; $('#admpw-msg').textContent=''; setTimeout(()=>$('#admpw-in').focus(),80);} }
+function admPin(){ return ls('irojeong.adm.pin')||''; }
+
+async function gateCheck(){
+  if(gateBusy) return; gateBusy=true;
+  try{
+    const r=await fetchT(API+'?action=me&dev='+encodeURIComponent(devId())+'&t='+Date.now(),20000).then(x=>x.json());
+    if(r&&r.ok){ admSet(!!r.admin); if(r.admin) ls('irojeong.adm.on','1'); }
+    if(r&&r.ok&&(r.admin||r.state==='허용')){
+      gateShow(false); if(r.store) ls('irojeong.store',r.store);
+      if(gateT){ clearInterval(gateT); gateT=null; }
+      gateBusy=false; boot(); return;
+    }
+    gateShow(true);
+    if(r&&r.state==='대기'){
+      $('#g-title').textContent='허가를 기다리는 중입니다';
+      $('#g-msg').textContent='사장님이 허가하면 바로 열립니다. 이 화면을 켜두십시오.';
+      $('#g-form').hidden=true;
+    } else if(r&&r.state==='차단'){
+      $('#g-title').textContent='사용이 중지되었습니다';
+      $('#g-msg').textContent='사장님께 문의하십시오.';
+      $('#g-form').hidden=true;
+    } else {
+      $('#g-title').textContent='사용 신청';
+      $('#g-msg').textContent='이름을 적고 매장을 고른 뒤 신청하십시오.';
+      $('#g-form').hidden=false;
+    }
+  }catch(e){
+    gateShow(true);
+    $('#g-title').textContent='연결을 확인하십시오';
+    $('#g-msg').textContent='인터넷이 끊겨 있습니다. 연결되면 저절로 열립니다.';
+    $('#g-form').hidden=true;
+  }
+  gateBusy=false;
+  if(!gateT) gateT=setInterval(gateCheck,10000);
+}
+async function gateJoin(){
+  const n=($('#g-name').value||'').trim(); if(!n||!GSTORE) return;
+  const b=$('#g-send'); b.disabled=true; b.textContent='보내는 중...';
+  try{
+    await fetchT(API+'?action=join&dev='+encodeURIComponent(devId())+'&name='+encodeURIComponent(n)
+      +'&store='+encodeURIComponent(GSTORE)+'&t='+Date.now(),25000);
+    ls('irojeong.store',GSTORE);
+  }catch(e){}
+  b.disabled=false; b.textContent='사용 신청하기';
+  gateCheck();
+}
+
+/* 보내기 — POST가 막히는 환경이면 GET으로 한 번 더 */
+async function send(o){
+  try{
+    const r=await fetchT(API,25000,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(o)}).then(x=>x.json());
+    if(r&&(r.ok||r.err==='pin')) return r;
+  }catch(e){}
+  const qs=Object.keys(o).map(k=>k+'='+encodeURIComponent(typeof o[k]==='object'?JSON.stringify(o[k]):o[k])).join('&');
+  return fetchT(API+'?'+qs+'&t='+Date.now(),25000).then(x=>x.json());
+}
+
+/* ───── 레시피 불러오기 ───── */
+async function loadOver(){
+  try{
+    const r=await fetchT(API+'?action=recipes&dev='+encodeURIComponent(devId())+'&t='+Date.now(),20000).then(x=>x.json());
+    if(r&&r.ok&&r.items){
+      const o={};
+      Object.keys(r.items).forEach(k=>{ const v=r.items[k]; if(v&&v.ings) o[k]=Object.assign({id:k},v); });
+      OVER=o;
+    }
+  }catch(e){}
+  if(cur&&!editing){ $('#htit').textContent=get(cur).title; renderD(); } else if(!cur) renderL();
+}
+function boot(){
+  if(opened) return; opened=true;
+  renderCats(); renderL(); loadOver();
+}
+
+/* ───── 목록 ───── */
+function renderCats(){
+  const cs=['전체',...new Set(BUILTIN.map(r=>get(r.id).cat).filter(Boolean))];
+  $('#cats').innerHTML=cs.map(c=>`<button type="button" class="cat${c===catSel?' on':''}" data-c="${esc(c)}">${esc(c)}</button>`).join('');
+}
+function renderL(){
+  const q=($('#q').value||'').trim().toLowerCase();
+  const rows=BUILTIN.map(b=>get(b.id)).filter(r=>{
+    if(catSel!=='전체'&&r.cat!==catSel) return false;
+    if(!q) return true;
+    return r.title.toLowerCase().includes(q)||r.ings.some(i=>(i.name||'').toLowerCase().includes(q));
+  });
+  $('#cnt').textContent = (q||catSel!=='전체') ? `${rows.length}건 (전체 ${BUILTIN.length}건 중)` : `레시피 ${BUILTIN.length}건 · 전 재료 g / ml 확정`;
+  $('#list').innerHTML = rows.length ? rows.map((r,i)=>`
+    <button type="button" class="rc" data-id="${esc(r.id)}">
+      <span class="n">${String(i+1).padStart(2,'0')}</span>
+      <span class="m"><b>${esc(r.title)}</b><small>재료 ${r.ings.length} · 1배 ${fmt(sum(r))} g</small></span>
+      <span class="pill${ed(r.id)?' e':''}">${ed(r.id)?'수정됨':esc(r.cat||'')}</span>
+    </button>`).join('') : '<p class="load">찾는 레시피가 없습니다.</p>';
+}
+
+/* ───── 상세 ───── */
+function openR(id){
+  cur=id; editing=false; draft=null;
+  mult=Number(ls('irojeong.rcp.m'))||1;
+  $('#lv').hidden=true; $('#dv').hidden=false; $('#back').hidden=false; $('#seal').hidden=true; $('#scbar').hidden=false;
+  $('#htit').textContent=get(id).title;
+  window.scrollTo(0,0); syncM(); renderD();
+}
+function closeR(){
+  cur=null; editing=false; draft=null;
+  $('#lv').hidden=false; $('#dv').hidden=true; $('#back').hidden=true; $('#seal').hidden=false; $('#scbar').hidden=true;
+  $('#htit').textContent='표준 레시피';
+  renderL(); window.scrollTo(0,0);
+}
+function syncM(){
+  document.querySelectorAll('.mb').forEach(b=>b.classList.toggle('on',Number(b.dataset.m)===mult));
+  if(document.activeElement!==$('#mfree')) $('#mfree').value=mult;
+  const r=cur&&get(cur); if(!r) return;
+  if(document.activeElement!==$('#mtot')) $('#mtot').value='';
+  $('#shint').textContent=`1배 ${fmt(sum(r))} g  →  ${mult}배 적용 ${fmt(sum(r)*mult)} g`;
+}
+function setM(m){
+  m=Number(m); if(!isFinite(m)||m<=0) return;
+  mult=Math.round(m*1000)/1000; ls('irojeong.rcp.m',mult);
+  syncM(); if(!editing) renderD();
+}
+function renderD(){
+  if(editing) return renderE();
+  const r=get(cur), t=sum(r);
+  $('#dv').innerHTML=`
+    <h2 class="rt">${esc(r.title)}</h2>
+    ${r.note?`<p class="rn">${esc(r.note)}</p>`:''}
+    <h3>재료 및 계량</h3>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>재료</th><th>1배</th><th>${mult}배 적용</th><th></th></tr></thead><tbody>
+      ${r.ings.map(i=>`<tr><td>${esc(i.name)}</td><td class="b">${fmt(i.qty)}</td>
+        <td class="a">${fmt((Number(i.qty)||0)*mult)}</td><td class="u">${esc(i.unit)}</td></tr>`).join('')}
+      <tr class="tot"><td>합계</td><td class="b">${fmt(t)}</td><td class="a">${fmt(t*mult)}</td><td class="u">g</td></tr>
+      </tbody></table></div>
+    ${r.steps.length?`<h3>만드는 방법</h3><ol class="st">${r.steps.map(s=>`<li><span>${esc(s)}</span></li>`).join('')}</ol>`:''}
+    ${r.cautions.length?`<h3>주의사항</h3><ul class="cu">${r.cautions.map(c=>`<li>${esc(c)}</li>`).join('')}</ul>`:''}
+    ${ADM?`<div class="tools"><button type="button" class="bt p" id="goe">레시피 고치기</button>
+      ${ed(cur)?'<button type="button" class="bt d" id="rst">원본으로 되돌리기</button>':''}</div>`
+     :'<p class="ro">레시피 수정은 사장님만 할 수 있습니다.</p>'}
+    ${ed(cur)?`<p class="msg ok">● 수정된 레시피입니다${OVER[cur].updatedAt?' · '+esc(String(OVER[cur].updatedAt).slice(0,10)):''}</p>`:''}`;
+}
+
+/* ───── 편집(관리자) ───── */
+function renderE(){
+  const d=draft;
+  $('#dv').innerHTML=`
+    <h2 class="rt">레시피 고치기</h2>
+    <p class="rn">1배 기준으로 적으십시오. 배율은 보는 사람이 정합니다.</p>
+    <h3>이름</h3>
+    <input type="text" class="full" id="e-t" value="${esc(d.title)}" aria-label="레시피 이름">
+    <input type="text" class="full" id="e-n" value="${esc(d.note||'')}" placeholder="한 줄 설명" aria-label="설명">
+    <h3>재료 · 1배 계량</h3>
+    <div id="e-i">${d.ings.map(ingRow).join('')}</div>
+    <button type="button" class="bt" id="ai">＋ 재료 추가</button>
+    <h3>만드는 방법</h3>
+    <div id="e-s">${d.steps.map((s,n)=>taRow(s,n,'s')).join('')}</div>
+    <button type="button" class="bt" id="as">＋ 단계 추가</button>
+    <h3>주의사항</h3>
+    <div id="e-c">${d.cautions.map((c,n)=>taRow(c,n,'c')).join('')}</div>
+    <button type="button" class="bt" id="ac">＋ 주의사항 추가</button>
+    <div class="tools">
+      <button type="button" class="bt p" id="sv">저장</button>
+      <button type="button" class="bt" id="cx">취소</button>
+    </div>
+    <p class="msg" id="svm"></p>`;
+}
+const ingRow=(i,n)=>`<div class="er">
+  <input type="text" class="i-n" data-n="${n}" value="${esc(i.name)}" placeholder="재료명" aria-label="재료명">
+  <input type="number" class="q i-q" data-n="${n}" value="${i.qty==null?'':i.qty}" step="any" inputmode="decimal" aria-label="계량">
+  <input type="text" class="un i-u" data-n="${n}" value="${esc(i.unit)}" aria-label="단위">
+  <button type="button" class="del" data-d="i" data-n="${n}" aria-label="삭제">×</button></div>`;
+const taRow=(t,n,k)=>`<div class="er">
+  <textarea class="t-${k}" data-n="${n}" aria-label="내용">${esc(t)}</textarea>
+  <button type="button" class="del" data-d="${k}" data-n="${n}" aria-label="삭제">×</button></div>`;
+
+function collect(){
+  draft.title=($('#e-t').value||'').trim()||draft.title;
+  draft.note=($('#e-n').value||'').trim();
+  const ings=[];
+  document.querySelectorAll('.i-n').forEach(el=>{
+    const n=el.dataset.n, nm=(el.value||'').trim();
+    if(!nm) return;
+    const q=document.querySelector('.i-q[data-n="'+n+'"]').value;
+    const u=(document.querySelector('.i-u[data-n="'+n+'"]').value||'').trim();
+    ings.push({name:nm,qty:q===''?null:Number(q),unit:u});
+  });
+  draft.ings=ings;
+  draft.steps=[...document.querySelectorAll('.t-s')].map(e=>(e.value||'').trim()).filter(Boolean);
+  draft.cautions=[...document.querySelectorAll('.t-c')].map(e=>(e.value||'').trim()).filter(Boolean);
+}
+async function saveR(){
+  collect();
+  const m=$('#svm'), b=$('#sv');
+  if(!draft.ings.length){ m.className='msg no'; m.textContent='재료를 하나 이상 넣으십시오.'; return; }
+  draft.updatedAt=new Date().toISOString().slice(0,10);
+  b.disabled=true; b.textContent='저장 중...';
+  m.className='msg'; m.textContent='';
+  try{
+    const r=await send({action:'recipeSave',pin:admPin(),dev:devId(),id:cur,data:draft});
+    if(!r||!r.ok) throw new Error(r&&r.err||'fail');
+    OVER[cur]=Object.assign({id:cur},draft);
+    editing=false; draft=null; $('#htit').textContent=get(cur).title; renderD(); window.scrollTo(0,0);
+  }catch(e){
+    b.disabled=false; b.textContent='저장';
+    m.className='msg no';
+    m.textContent=String(e.message)==='pin' ? '비밀번호가 맞지 않습니다. 관리자 확인을 다시 하십시오.' : '저장하지 못했습니다. 잠시 후 다시 눌러 주십시오.';
+  }
+}
+async function resetR(){
+  const b=$('#rst'); if(b){ b.disabled=true; b.textContent='되돌리는 중...'; }
+  try{
+    const r=await send({action:'recipeDel',pin:admPin(),dev:devId(),id:cur});
+    if(!r||!r.ok) throw new Error(r&&r.err||'fail');
+    delete OVER[cur];
+  }catch(e){}
+  $('#htit').textContent=get(cur).title; renderD();
+}
+
+/* ───── 이벤트 ───── */
+document.addEventListener('click',e=>{
+  const t=e.target;
+  const rc=t.closest('.rc'); if(rc) return openR(rc.dataset.id);
+  const ct=t.closest('.cat'); if(ct){ catSel=ct.dataset.c; renderCats(); renderL(); return; }
+  const mb=t.closest('.mb'); if(mb) return setM(mb.dataset.m);
+  const gs=t.closest('.gst button'); if(gs){ GSTORE=gs.dataset.s;
+    document.querySelectorAll('.gst button').forEach(b=>b.classList.toggle('on',b.dataset.s===GSTORE)); return; }
+  if(t.id==='g-send') return gateJoin();
+  if(t.id==='back') return closeR();
+  if(t.id==='admpw-ok'){
+    const p=($('#admpw-in').value||'').trim();
+    if(!p){ $('#admpw-msg').textContent='비밀번호를 넣으십시오.'; return; }
+    ls('irojeong.adm.pin',p); ls('irojeong.adm.on','1'); admSet(true); admPwShow(false);
+    fetchT(API+'?action=admin&pin='+encodeURIComponent(p)+'&dev='+encodeURIComponent(devId())+'&t='+Date.now(),20000).catch(()=>{});
+    return;
+  }
+  if(t.id==='admpw-no') return admPwShow(false);
+  if(t.id==='goe'){ const r=get(cur);
+    draft=JSON.parse(JSON.stringify({title:r.title,cat:r.cat,note:r.note,ings:r.ings,steps:r.steps,cautions:r.cautions}));
+    editing=true; renderE(); window.scrollTo(0,0); return; }
+  if(t.id==='cx'){ editing=false; draft=null; renderD(); return; }
+  if(t.id==='sv') return saveR();
+  if(t.id==='rst') return resetR();
+  if(t.id==='ai'){ collect(); draft.ings.push({name:'',qty:null,unit:'g'}); renderE(); return; }
+  if(t.id==='as'){ collect(); draft.steps.push(''); renderE(); return; }
+  if(t.id==='ac'){ collect(); draft.cautions.push(''); renderE(); return; }
+  const d=t.closest('[data-d]');
+  if(d){ collect(); const n=Number(d.dataset.n);
+    if(d.dataset.d==='i') draft.ings.splice(n,1);
+    else if(d.dataset.d==='s') draft.steps.splice(n,1);
+    else draft.cautions.splice(n,1);
+    renderE(); return; }
+});
+$('#q').addEventListener('input',renderL);
+$('#mfree').addEventListener('input',e=>{ const v=Number(e.target.value); if(v>0) setM(v); });
+$('#mtot').addEventListener('input',e=>{
+  const w=Number(e.target.value), r=cur&&get(cur); if(!r||!(w>0)) return;
+  const b=sum(r); if(b>0) setM(w/b);
+});
+$('#g-name').addEventListener('keydown',e=>{ if(e.key==='Enter') gateJoin(); });
+$('#admpw-in').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#admpw-ok').click(); });
+
+/* 도장 5번 — 관리자 */
+$('#seal').addEventListener('click',()=>{
+  const now=Date.now(); if(now-admTapT>1800) admTaps=0;
+  admTapT=now; admTaps++;
+  if(admTaps>=5){ admTaps=0; if(!ADM) admPwShow(true); }
+});
+$('#admbadge').addEventListener('click',()=>{
+  ls('irojeong.adm.on',null); ls('irojeong.adm.pin',null); admSet(false);
+});
+
+/* 시작 */
+GSTORE=ls('irojeong.store')||'';
+if(GSTORE) document.querySelectorAll('.gst button').forEach(b=>b.classList.toggle('on',b.dataset.s===GSTORE));
+if(ls('irojeong.adm.on')==='1') admSet(true);
+$('#list').innerHTML='<p class="load">불러오는 중…</p>';
+gateCheck();
+</script>
+</body>
+</html>
