@@ -335,15 +335,23 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
 #oc h3{margin:0 0 9px;font-size:15px}
 #oc .ocrow{display:flex;gap:7px}
 #oc select{flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font:inherit;color:inherit}
-#oc-list{max-height:190px;overflow:auto;margin:9px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+#oc-list{max-height:340px;overflow:auto;margin:9px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
 #oc-list:empty{display:none;margin:0;border:0}
-.oc-r{padding:7px 10px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--sub);display:flex;gap:8px;flex-wrap:wrap}
-.oc-r:last-child{border-bottom:0}
+.oc-i{border-bottom:1px solid var(--line)}
+.oc-i:last-child{border-bottom:0}
+.oc-r{padding:9px 10px;font-size:12.5px;color:var(--sub);display:flex;gap:8px;flex-wrap:wrap;align-items:center;cursor:pointer}
 .oc-r b{color:var(--ink);font-weight:700}
+.oc-r .ar{margin-left:auto;font-size:11px;opacity:.55}
+.oc-i.on .oc-r{color:var(--ink)}
+.oc-i.on .oc-r .ar{opacity:1}
+.oc-t{display:none;padding:0 10px 11px;font-size:12.5px;line-height:1.7;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+.oc-i.on .oc-t{display:block}
 .oc-e{padding:12px;margin:0;font-size:12.5px;color:var(--sub);text-align:center}
 #oc-del{width:100%;margin-top:9px;padding:11px;border:0;border-radius:10px;background:var(--brand);color:#fff;font:700 14px/1 inherit}
 #oc-del:disabled{opacity:.4}
 #oc-msg{font-size:12.5px;color:var(--ok);margin:8px 0 0;min-height:16px}
+#oc .ocall{margin:9px 0 0;text-align:right}
+#oc .ocall button{padding:6px 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--sub);font:700 12px/1 inherit}
 </style>
 
 <div id="admpw" hidden><div class="gbox">
@@ -364,6 +372,7 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
       <select id="oc-store" onchange="ocInit()"><option value="">전체 매장</option><option>구미</option><option>현풍</option><option>밀양</option></select>
       <select id="oc-ym" onchange="ocLoad()"></select>
     </div>
+    <p class="ocall"><button type="button" onclick="ocAll()">전체 펼치기 / 접기</button></p>
     <div id="oc-list"></div>
     <button type="button" id="oc-del" onclick="ocDel()" disabled>이 달 기록 지우기</button>
     <p id="oc-msg"></p>
@@ -894,7 +903,7 @@ async function ocLoad(){
     const rows=(r&&r.rows)||[];
     $('#oc-del').disabled = !rows.length;
     if(!rows.length){ box.innerHTML='<p class="oc-e">이 달에는 기록이 없습니다.</p>'; return; }
-    box.innerHTML = rows.map(o=>'<div class="oc-r"><b>'+esc2(o.at)+'</b><span>'+esc2(o.dest||'')+'</span><span>'+esc2(o.v)+'</span>'+(o.who?'<span>'+esc2(o.who)+'</span>':'')+'</div>').join('');
+    box.innerHTML = rows.map(o=>'<div class="oc-i"><div class="oc-r" onclick="ocTog(this)"><b>'+esc2(o.at)+'</b><span>'+esc2(o.dest||'')+'</span><span>'+esc2(o.v)+'</span>'+(o.who?'<span>'+esc2(o.who)+'</span>':'')+'<span class="ar">\u25be</span></div><div class="oc-t">'+esc2(o.text||'(내용 없음)')+'</div></div>').join('');
   }catch(e){ box.innerHTML='<p class="oc-e">불러오지 못했습니다.</p>'; }
 }
 async function ocDel(){
@@ -914,7 +923,9 @@ async function ocDel(){
     m.textContent = String(e.message)==='pin' ? '비밀번호가 맞지 않습니다.' : '지우지 못했습니다.';
   }
 }
-window.ocInit=ocInit; window.ocLoad=ocLoad; window.ocDel=ocDel;
+function ocTog(el){ el.parentNode.classList.toggle('on'); }
+function ocAll(){ const L=document.querySelectorAll('#oc-list .oc-i'); const open=document.querySelectorAll('#oc-list .oc-i.on').length < L.length; L.forEach(x=>x.classList.toggle('on', open)); }
+window.ocInit=ocInit; window.ocLoad=ocLoad; window.ocDel=ocDel; window.ocTog=ocTog; window.ocAll=ocAll;
 function admPinGet(){ try{ return localStorage.getItem('irojeong.adm.pin')||''; }catch(e){ return ''; } }
 function admSet(on){ ADM=on; const b=$('#adm-open'); if(b) b.className = on?'on':''; }
 function admShow(on){ const p=$('#adm'); if(!p) return; p.hidden=!on; document.body.style.overflow = on?'hidden':''; if(on){ admLoad(); ocInit(); } }
