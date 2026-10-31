@@ -331,6 +331,19 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
 #nz-save{background:var(--brand);color:#fff}
 #nz-clear{background:var(--fill);color:var(--sub);border:1px solid var(--line)!important}
 #nz-msg{font-size:12.5px;color:var(--ok);margin:8px 0 0;min-height:16px}
+#oc{max-width:520px;margin:0 auto 16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+#oc h3{margin:0 0 9px;font-size:15px}
+#oc .ocrow{display:flex;gap:7px}
+#oc select{flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font:inherit;color:inherit}
+#oc-list{max-height:190px;overflow:auto;margin:9px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+#oc-list:empty{display:none;margin:0;border:0}
+.oc-r{padding:7px 10px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--sub);display:flex;gap:8px;flex-wrap:wrap}
+.oc-r:last-child{border-bottom:0}
+.oc-r b{color:var(--ink);font-weight:700}
+.oc-e{padding:12px;margin:0;font-size:12.5px;color:var(--sub);text-align:center}
+#oc-del{width:100%;margin-top:9px;padding:11px;border:0;border-radius:10px;background:var(--brand);color:#fff;font:700 14px/1 inherit}
+#oc-del:disabled{opacity:.4}
+#oc-msg{font-size:12.5px;color:var(--ok);margin:8px 0 0;min-height:16px}
 </style>
 
 <div id="admpw" hidden><div class="gbox">
@@ -346,6 +359,15 @@ main{max-width:620px;margin:0 auto;padding:0 20px 150px}
 <div id="adm" hidden>
   <div class="adm-bar"><h2>사용자 허가</h2><div><button type="button" id="adm-off">관리 해제</button> <button type="button" id="adm-ref">새로고침</button> <button type="button" id="adm-close">닫기</button></div></div>
   <div id="nz"><h3>직원에게 보일 공지</h3><textarea id="nz-text" placeholder="예) 수요일 각 매장 전달 — 추어탕 국물 따로 옵니다"></textarea><div class="nrow"><button type="button" id="nz-save">올리기</button><button type="button" id="nz-clear">내리기</button></div><p id="nz-msg"></p></div>
+  <div id="oc"><h3>발주 기록 정리</h3>
+    <div class="ocrow">
+      <select id="oc-store" onchange="ocInit()"><option value="">전체 매장</option><option>구미</option><option>현풍</option><option>밀양</option></select>
+      <select id="oc-ym" onchange="ocLoad()"></select>
+    </div>
+    <div id="oc-list"></div>
+    <button type="button" id="oc-del" onclick="ocDel()" disabled>이 달 기록 지우기</button>
+    <p id="oc-msg"></p>
+  </div>
   <div id="adm-list"><div class="u-empty">불러오는 중…</div></div>
 </div>
 
@@ -841,9 +863,61 @@ function gsendOK(){ const n=($('#g-name').value||'').trim(); $('#g-send').disabl
 function gateShow(on){ $('#gate').hidden=!on; document.body.style.overflow = on?'hidden':''; }
 /* ===== 관리(사장 전용) ===== */
 let ADM=false, admHold=null, admTaps=0, admTapT=0, admArm=null;
+/* ===== 발주 기록 정리 (월 단위) ===== */
+let OC_STORE='', OC_YM='';
+async function ocInit(){
+  const sel=$('#oc-store'); if(!sel) return;
+  OC_STORE = sel.value||'';
+  await ocMonths();
+}
+async function ocMonths(){
+  const m=$('#oc-msg'), sel=$('#oc-ym');
+  m.style.color='var(--ok)'; m.textContent='';
+  sel.innerHTML='<option value="">불러오는 중…</option>';
+  $('#oc-list').innerHTML=''; $('#oc-del').disabled=true;
+  try{
+    const r=await fetchT(API+'?action=orderMonths&store='+encodeURIComponent(OC_STORE)+'&t='+Date.now(),20000).then(x=>x.json());
+    if(!r||!r.ok||!r.months||!r.months.length){
+      sel.innerHTML='<option value="">기록 없음</option>'; m.textContent='기록이 없습니다.'; return;
+    }
+    sel.innerHTML = r.months.map(x=>'<option value="'+x.ym+'">'+x.ym.slice(0,4)+'년 '+Number(x.ym.slice(5,7))+'월  ('+x.n+'건)</option>').join('');
+    ocLoad();
+  }catch(e){ sel.innerHTML='<option value="">불러오지 못함</option>'; m.style.color='var(--brand)'; m.textContent='불러오지 못했습니다.'; }
+}
+async function ocLoad(){
+  OC_YM = $('#oc-ym').value||'';
+  const box=$('#oc-list');
+  if(!OC_YM){ box.innerHTML=''; $('#oc-del').disabled=true; return; }
+  box.innerHTML='<p class="oc-e">불러오는 중…</p>';
+  try{
+    const r=await fetchT(API+'?action=orders&store='+encodeURIComponent(OC_STORE)+'&ym='+encodeURIComponent(OC_YM)+'&t='+Date.now(),25000).then(x=>x.json());
+    const rows=(r&&r.rows)||[];
+    $('#oc-del').disabled = !rows.length;
+    if(!rows.length){ box.innerHTML='<p class="oc-e">이 달에는 기록이 없습니다.</p>'; return; }
+    box.innerHTML = rows.map(o=>'<div class="oc-r"><b>'+esc2(o.at)+'</b><span>'+esc2(o.dest||'')+'</span><span>'+esc2(o.v)+'</span>'+(o.who?'<span>'+esc2(o.who)+'</span>':'')+'</div>').join('');
+  }catch(e){ box.innerHTML='<p class="oc-e">불러오지 못했습니다.</p>'; }
+}
+async function ocDel(){
+  if(!OC_YM) return;
+  const label=(OC_STORE||'전체 매장')+' · '+OC_YM;
+  if(!confirm(label+' 발주 기록을 모두 지웁니다.\n되돌릴 수 없습니다. 계속할까요?')) return;
+  if(!confirm('한 번 더 확인합니다.\n정말 지우시겠습니까?')) return;
+  const m=$('#oc-msg'); m.style.color='var(--ok)'; m.textContent='지우는 중…';
+  try{
+    const r=await fetchT(API+'?action=orderDelMonth&pin='+encodeURIComponent(admPinGet())
+      +'&store='+encodeURIComponent(OC_STORE)+'&ym='+encodeURIComponent(OC_YM)+'&t='+Date.now(),30000).then(x=>x.json());
+    if(!r||!r.ok) throw new Error((r&&r.err)||'fail');
+    m.textContent=r.n+'건을 지웠습니다.';
+    ocMonths();
+  }catch(e){
+    m.style.color='var(--brand)';
+    m.textContent = String(e.message)==='pin' ? '비밀번호가 맞지 않습니다.' : '지우지 못했습니다.';
+  }
+}
+window.ocInit=ocInit; window.ocLoad=ocLoad; window.ocDel=ocDel;
 function admPinGet(){ try{ return localStorage.getItem('irojeong.adm.pin')||''; }catch(e){ return ''; } }
 function admSet(on){ ADM=on; const b=$('#adm-open'); if(b) b.className = on?'on':''; }
-function admShow(on){ const p=$('#adm'); if(!p) return; p.hidden=!on; document.body.style.overflow = on?'hidden':''; if(on) admLoad(); }
+function admShow(on){ const p=$('#adm'); if(!p) return; p.hidden=!on; document.body.style.overflow = on?'hidden':''; if(on){ admLoad(); ocInit(); } }
 function admPwShow(on){ const p=$('#admpw'); if(!p) return; p.hidden=!on; document.body.style.overflow = on?'hidden':''; const i=$('#admpw-in'); if(on&&i){ i.value=''; $('#admpw-msg').textContent=''; setTimeout(()=>i.focus(),120); } }
 function fetchT(url, ms){
   const c=new AbortController();
